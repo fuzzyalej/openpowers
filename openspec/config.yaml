@@ -1,0 +1,8 @@
+schema: spec-driven
+
+context: |
+  This is the openpowers plugin repository.
+  Tech stack: Claude Code plugin system (markdown skill files, plugin.json manifest).
+  The plugin orchestrates openspec CLI and superpowers plugin.
+  Skills live in skills/<name>/SKILL.md. Commands live in commands/<name>.md.
+  No bundling of external skills — openpowers calls them as installed dependencies.
