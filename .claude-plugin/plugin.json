@@ -1,6 +1,6 @@
 {
   "name": "openpowers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Spec-driven feature development workflow. Orchestrates openspec + superpowers for guided, paper-trailed feature delivery.",
   "skills": [
     "./skills/feature-check-prereqs",
@@ -9,8 +9,5 @@
     "./skills/feature-implement",
     "./skills/feature-deliver",
     "./skills/feature-status"
-  ],
-  "commands": [
-    "./commands/feature.md"
   ]
 }

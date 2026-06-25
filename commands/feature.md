@@ -1,3 +1,7 @@
+---
+description: Guided feature development workflow — shape, implement, and deliver features with openspec + superpowers
+---
+
 # /feature command router
 
 Route the `/feature` command to the correct skill based on `$ARGUMENTS`.
