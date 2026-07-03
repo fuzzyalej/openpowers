@@ -1,6 +1,6 @@
 ---
 name: feature-init
-description: Initialize a project for the openpowers workflow. Creates guidelines.md, updates CLAUDE.md, generates .gitignore, and scaffolds the docs/ structure. Run once per project before using /feature.
+description: Initialize a project for the openpowers workflow. Creates guidelines.md, updates CLAUDE.md, generates .gitignore, and scaffolds the docs/ structure. Run once per project before using /openpowers:feature.
 ---
 
 Initialize a project for the openpowers workflow.
@@ -75,85 +75,44 @@ PostgreSQL, MySQL/MariaDB, SQLite, MongoDB, Redis, None
 
 ---
 
-## Step 4: Generate guidelines.md
+## Step 4: Generate guidelines.md from the template
 
-Create `guidelines.md` at the repo root with this content, substituting the stack answers:
+`guidelines.md` is **not** authored by hand — copy the canonical scaffold shipped
+with the plugin and substitute only the stack-specific values. This keeps the
+fixed sections (Simplicity, Code Quality, Security, Testing, Linting,
+Documentation, Feature Conventions) byte-identical across every project.
 
-```markdown
-# Project Guidelines
+1. **Copy the template** to the repo root:
 
-## Architecture
+   ```bash
+   cp "${CLAUDE_PLUGIN_ROOT}/templates/guidelines.md" guidelines.md
+   ```
 
-Write the architecture block that matches the user's chosen style. Include only the block for the chosen style — do not include the others.
+2. **Fill the architecture block.** Pick the template that matches the chosen
+   architecture style and splice its contents in place of the `{{ARCHITECTURE}}`
+   placeholder:
 
-**If Hexagonal:**
-- Hexagonal architecture (ports & adapters): domain logic isolated from infrastructure. Define interfaces at the boundary; implementations live outside.
-- Dependency rule: inward only. Domain knows nothing about HTTP, DB, queues, or UI.
-- SOLID principles: Single responsibility, Open/closed, Liskov substitution, Interface segregation, Dependency inversion.
+   | Chosen style | Template file |
+   |---|---|
+   | Hexagonal | `${CLAUDE_PLUGIN_ROOT}/templates/architecture/hexagonal.md` |
+   | Layered | `${CLAUDE_PLUGIN_ROOT}/templates/architecture/layered.md` |
+   | Modular monolith | `${CLAUDE_PLUGIN_ROOT}/templates/architecture/modular-monolith.md` |
+   | None / minimal | `${CLAUDE_PLUGIN_ROOT}/templates/architecture/minimal.md` |
 
-**If Layered:**
-- Layered architecture: controllers → services → repositories. Each layer depends only on the layer below.
-- No business logic in controllers. No database calls in services (use repository interfaces).
+3. **Fill the stack placeholders** with the answers from Step 3, using an Edit
+   per token (do not retype the surrounding lines):
 
-**If Modular monolith:**
-- Modular monolith: one deployable, split into feature modules. Each module owns its models, services, and persistence.
-- Cross-module dependencies go through published interfaces, never direct internal imports.
+   - `{{LANGUAGE}}` → language answer
+   - `{{RUNTIME}}` → runtime/framework answer
+   - `{{TEST_FRAMEWORK}}` → test framework answer
+   - `{{DATABASE}}` → DB/persistence answer(s)
+   - `{{LINTER}}` → linter/formatter answer
 
-**If None / minimal:**
-- Flat structure. No enforced architectural pattern.
-- Prefer small, single-purpose files. Avoid unnecessary abstraction layers.
+4. **Verify no placeholders remain:**
 
-## Simplicity (default stance)
-- Implement the minimum that satisfies the acceptance criteria. No more.
-- Every abstraction must earn its place. If you can delete it and tests still pass, delete it.
-- When brainstorming, always present a "simpler alternative" trade-off.
-  The designer must consciously choose complexity.
-
-## Code Quality
-- No logic in controllers/handlers — they translate, nothing more.
-- Name things in domain language (Order, not OrderDTO).
-- No magic numbers or strings — named constants only.
-- Functions do one thing. If you need "and" to describe it, split it.
-
-## Security (minimum bar, always)
-- Validate all input at system boundaries. Trust nothing external.
-- No secrets in code or config files — use environment variables.
-- Principle of least privilege for all service accounts and DB users.
-- Sanitize before rendering. Escape before querying.
-
-## Testing
-- Test behavior at ports, not implementation details inside adapters.
-- Each test has one reason to fail.
-- Tests are documentation: name them as sentences describing expected behavior.
-- No production logic in test helpers.
-
-## Linting & Formatting
-- Linter and formatter configured at project init. No manual style debates.
-- CI blocks merges on lint or format failures.
-- Zero warnings policy: treat warnings as errors.
-
-## Documentation
-- Architecture decisions, setup guides, CLI references, and specialized processes
-  live in docs/ and are committed as part of the feature that introduces them.
-- Documentation is updated before the delivery tag — it is part of done.
-- docs/superpowers/ is the only gitignored subdirectory (temporal plans and specs).
-
-## Stack
-- Language: <answer from Question 1>
-- Runtime: <answer from Question 2>
-- Test framework: <answer from Question 3>
-- DB / persistence: <answer from Question 4>
-- Linter / formatter: <answer from Question 5>
-
-## Feature Conventions
-- Features are numbered and ordered: 0000-init, 0001-add-auth, ...
-  (4-digit zero-padded prefix, kebab-case, hyphens throughout)
-- Branch: feature/0001-add-auth
-- Worktree: .worktrees/feature-0001-add-auth (managed by superpowers)
-- Delivery tag: delivered/0001-add-auth (created before merge)
-- docs/superpowers/ is temporal, never committed
-- openspec/ and docs/ (except docs/superpowers/) are committed
-```
+   ```bash
+   grep -n "{{" guidelines.md && echo "UNFILLED PLACEHOLDERS — fix before continuing" || echo "OK"
+   ```
 
 Commit:
 ```bash
@@ -252,4 +211,4 @@ Tell the user:
 - .gitignore with security and stack-specific rules
 - docs/ structure scaffolded
 
-Use `/feature \"describe what you want to build\"` to start your first feature."
+Use `/openpowers:feature \"describe what you want to build\"` to start your first feature."

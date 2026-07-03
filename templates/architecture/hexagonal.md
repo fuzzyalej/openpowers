@@ -1,0 +1,3 @@
+- Hexagonal architecture (ports & adapters): domain logic isolated from infrastructure. Define interfaces at the boundary; implementations live outside.
+- Dependency rule: inward only. Domain knows nothing about HTTP, DB, queues, or UI.
+- SOLID principles: Single responsibility, Open/closed, Liskov substitution, Interface segregation, Dependency inversion.

@@ -1,0 +1,2 @@
+- Layered architecture: controllers → services → repositories. Each layer depends only on the layer below.
+- No business logic in controllers. No database calls in services (use repository interfaces).

@@ -1,0 +1,2 @@
+- Modular monolith: one deployable, split into feature modules. Each module owns its models, services, and persistence.
+- Cross-module dependencies go through published interfaces, never direct internal imports.

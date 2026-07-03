@@ -1,6 +1,6 @@
 ---
 name: feature-propose
-description: Shape and spec a new feature. Runs superpowers brainstorming to refine the idea, then creates an openspec change with artifacts committed to git. Use via /feature "description".
+description: Shape and spec a new feature. Runs superpowers brainstorming to refine the idea, then creates an openspec change with artifacts committed to git. Use via /openpowers:feature "description".
 ---
 
 Shape and create a spec for a new feature.
@@ -10,6 +10,10 @@ Shape and create a spec for a new feature.
 **Input:** A description of what to build. If not provided in `$ARGUMENTS`, ask:
 > "What do you want to build? Describe the feature or fix."
 
+Throughout this skill, `<change-name>` is a placeholder for the resolved change
+name from Step 2 (e.g. `c0001-add-user-auth`). Always substitute the real value —
+never type the example literally.
+
 ---
 
 ## Step 1: Verify prerequisites
@@ -18,45 +22,32 @@ Shape and create a spec for a new feature.
 
 ---
 
-## Step 2: Auto-assign feature number
+## Step 2: Resolve the change name
 
-**Re-entry check (run first):**
-
-```bash
-openspec list --json 2>/dev/null
-```
-
-From the JSON output, extract all change names (active and archived). Perform two checks:
-
-1. **Exact match:** Does the raw input exactly match any change name (e.g., `0001-add-user-auth`)? If yes, re-enter.
-2. **Slug match:** Slugify the input using the same rule as Step 3 (lowercase, spaces and special characters → hyphens, consecutive hyphens → one). Does the slug match the suffix of any change name (the part after the 4-digit prefix and hyphen)? For example, input `"add user auth"` slugifies to `add-user-auth`, which matches the suffix of `0001-add-user-auth`. If yes, re-enter.
-
-If either check matches: set `<change-name>` to the matched name. Announce: "Re-entering spec for existing change: **<change-name>**. Updating artifacts." Skip Steps 3 and 4 (slugify and brainstorming). Jump directly to Step 5.
-
-If no match is found, continue with numbering:
+Do **not** compute the number or detect re-entry by hand. Run the helper — it is
+the single source of truth for numbering and re-entry detection:
 
 ```bash
-openspec list --json 2>/dev/null
-ls openspec/changes/archive/ 2>/dev/null
+node "${CLAUDE_PLUGIN_ROOT}/scripts/resolve-change-name.mjs" "<raw feature description exactly as given>"
 ```
 
-From all change names across active and archived, extract the numeric prefix (pattern: exactly 4 digits at the start). Find the highest. The next number = highest + 1, zero-padded to 4 digits.
+The helper prints `key=value` lines. Read them:
 
-If no changes exist (first feature ever), start at `0000`.
+- `name=` → set `<change-name>` to this value for the rest of the skill.
+- `mode=reentry` → this description matches an existing change. Announce:
+  "Re-entering spec for existing change: **<change-name>**. Updating artifacts."
+  **Skip Step 3 (brainstorming)** and jump directly to Step 4.
+- `mode=new` → Announce:
+  "Feature number assigned: **<number>** | Change name: **<change-name>**"
+  Continue to Step 3.
+
+Naming scheme (for reference — the helper already applies it): `c<NNNN>-<slug>`.
+The leading `c` is required because openspec rejects change names that start with
+a digit.
 
 ---
 
-## Step 3: Derive change name
-
-Slugify the feature description: lowercase, replace spaces and special characters with hyphens, collapse consecutive hyphens to one.
-
-Prepend the zero-padded number: `0001-add-user-auth`
-
-Announce: "Feature number assigned: **0001** | Change name: **0001-add-user-auth**"
-
----
-
-## Step 4: Shape with brainstorming
+## Step 3: Shape with brainstorming
 
 **REQUIRED SKILL:** Use `superpowers:brainstorming` now.
 
@@ -66,19 +57,27 @@ Before invoking, pass the following instruction as additional context to the bra
 
 The brainstorming skill will ask clarifying questions, propose approaches, step through design sections, and save the result to `docs/superpowers/specs/YYYY-MM-DD-<name>-design.md` (gitignored — temporal).
 
-Do NOT proceed to Step 5 until the user has approved the brainstorming design.
+Do NOT proceed to Step 4 until the user has approved the brainstorming design.
 
 ---
 
-## Step 5: Create openspec change
+## Step 4: Create the openspec change
 
 ```bash
-openspec new change "0001-add-user-auth"
+openspec new change "<change-name>"
 ```
+
+openspec prints its own `Next: openspec status --change ...` hint after creating
+the change. **Ignore it** — the only next-step guidance openpowers surfaces to the
+user is the `/openpowers:feature ...` command in Step 8. Do not echo openspec's
+suggestion.
+
+If the change already exists (re-entry), `openspec new change` will report it
+already exists — that is expected; continue to Step 5 to regenerate artifacts.
 
 ---
 
-## Step 6: Generate openspec artifacts
+## Step 5: Generate openspec artifacts
 
 Use the brainstorming design from `docs/superpowers/specs/` as the source of truth. Run each instruction command and follow its output to write the artifact:
 
@@ -99,7 +98,7 @@ Follow the instructions to write `openspec/changes/<change-name>/tasks.md`. Each
 
 ---
 
-## Step 7: Sanity check
+## Step 6: Sanity check
 
 Count lines in `tasks.md` that match `- [ ]`. If the count exceeds 8:
 
@@ -109,7 +108,7 @@ If the user says yes, continue. This is a flag, not a hard block.
 
 ---
 
-## Step 8: Commit
+## Step 7: Commit
 
 The openspec instructions commands write files but do NOT commit to git. Commit explicitly:
 
@@ -120,8 +119,8 @@ rtk git commit -m "spec(<change-name>): add proposal, design, and tasks"
 
 ---
 
-## Step 9: Confirm
+## Step 8: Confirm
 
-"Spec committed at `openspec/changes/0001-add-user-auth/`.
+"Spec committed at `openspec/changes/<change-name>/`.
 
-Run `/feature implement 0001-add-user-auth` when you are ready to implement."
+Run `/openpowers:feature implement <change-name>` when you are ready to implement."

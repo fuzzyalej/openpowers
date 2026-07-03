@@ -1,21 +1,23 @@
 ---
 name: feature-deliver
-description: Run the delivery sequence for a completed feature — mark tasks done, documentation gate, clean branch history, create delivery tag, archive the openspec change, and land the branch. Use via /feature deliver <name> or called from feature-implement after all tasks are green.
+description: Run the delivery sequence for a completed feature — mark tasks done, documentation gate, clean branch history, create delivery tag, archive the openspec change, and land the branch. Use via /openpowers:feature deliver <name> or called from feature-implement after all tasks are green.
 ---
 
 Complete the delivery sequence for a feature whose implementation is done and tests are green.
 
 **Announce at start:** "I'm using the feature-deliver skill to deliver this feature."
 
-**Input:** A change name (e.g., `0001-add-user-auth`). If not provided in `$ARGUMENTS`, run `openspec list` and ask the user to select.
+**Input:** A change name like `c0001-add-user-auth`. If not provided in `$ARGUMENTS`, run `openspec list` and ask the user to select.
+
+Throughout this skill, `<change-name>` is a placeholder for that name — always substitute the real value.
 
 ---
 
 ## Step 1: Confirm readiness
 
 Verify:
-1. `guidelines.md` exists at the repo root. If it does not, stop: "guidelines.md is missing. Run `/feature init` to set up the project before delivering."
-2. All tests pass: check `guidelines.md` for the test framework and test command, then run it. If tests fail, stop: "Tests must be green before delivery. Fix the failures and re-run `/feature deliver <change-name>`."
+1. `guidelines.md` exists at the repo root. If it does not, stop: "guidelines.md is missing. Run `/openpowers:feature init` to set up the project before delivering."
+2. All tests pass: check `guidelines.md` for the test framework and test command, then run it. If tests fail, stop: "Tests must be green before delivery. Fix the failures and re-run `/openpowers:feature deliver <change-name>`."
 3. The change has a `tasks.md` at `openspec/changes/<change-name>/tasks.md`.
 
 ---

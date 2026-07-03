@@ -71,7 +71,7 @@ If you prefer not to pipe to bash, do it by hand:
 ### First time in a new project
 
 ```
-/feature init
+/openpowers:feature init
 ```
 
 Prompts for your stack (language, test framework, linter, DB), generates
@@ -80,27 +80,27 @@ Prompts for your stack (language, test framework, linter, DB), generates
 ### Start a new feature
 
 ```
-/feature "add user authentication"
+/openpowers:feature "add user authentication"
 ```
 
 Runs a guided brainstorming session to shape the idea, then creates a numbered
-openspec change (`0001-add-user-auth`) with proposal, design, and tasks committed
+openspec change (`c0001-add-user-auth`) with proposal, design, and tasks committed
 to git.
 
 ### Implement a feature
 
 ```
-/feature implement 0001-add-user-auth
+/openpowers:feature implement c0001-add-user-auth
 ```
 
-Creates a worktree on `feature/0001-add-user-auth`, synthesises an execution brief
+Creates a worktree on `feature/c0001-add-user-auth`, synthesises an execution brief
 from the openspec artifacts, executes it with TDD subagents, then hands off to
-`/feature deliver` for code review, tagging, archive, and landing.
+`/openpowers:feature deliver` for code review, tagging, archive, and landing.
 
 ### Re-enter a spec
 
 ```
-/feature propose 0001-add-user-auth
+/openpowers:feature propose c0001-add-user-auth
 ```
 
 Re-opens the spec flow for an existing change — regenerates proposal, design, and
@@ -109,7 +109,7 @@ tasks artifacts. Use when the spec is incomplete or needs revision before implem
 ### Deliver a feature
 
 ```
-/feature deliver 0001-add-user-auth
+/openpowers:feature deliver c0001-add-user-auth
 ```
 
 Runs the full delivery sequence: code review, branch history cleanup, delivery tag,
@@ -118,7 +118,7 @@ openspec archive, and branch landing (merge or PR).
 ### Check status
 
 ```
-/feature
+/openpowers:feature
 ```
 
 Shows all active changes with worktree state, commits ahead of main, and a
@@ -143,13 +143,13 @@ next-action hint per change (`implement`, `deliver`, `propose`, or investigate).
 ## Feature lifecycle
 
 ```
-/feature "add auth"
+/openpowers:feature "add auth"
     ↓
   brainstorming (superpowers)
     ↓
   openspec change created + committed
     ↓
-/feature implement 0001-add-auth
+/openpowers:feature implement c0001-add-auth
     ↓
   worktree + branch created
     ↓
@@ -157,7 +157,7 @@ next-action hint per change (`implement`, `deliver`, `propose`, or investigate).
     ↓
   TDD execution via subagents
     ↓
-/feature deliver 0001-add-auth
+/openpowers:feature deliver c0001-add-auth
     ↓
   code review
     ↓

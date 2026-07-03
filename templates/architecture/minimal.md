@@ -1,0 +1,2 @@
+- Flat structure. No enforced architectural pattern.
+- Prefer small, single-purpose files. Avoid unnecessary abstraction layers.

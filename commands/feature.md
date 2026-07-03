@@ -2,9 +2,11 @@
 description: Guided feature development workflow — shape, implement, and deliver features with openspec + superpowers
 ---
 
-# /feature command router
+# /openpowers:feature command router
 
-Route the `/feature` command to the correct skill based on `$ARGUMENTS`.
+Route the `/openpowers:feature` command to the correct skill based on `$ARGUMENTS`.
+(The command is namespaced `/openpowers:feature`; whenever this workflow surfaces a
+next-step command to the user, always use that fully-qualified form.)
 
 Read `$ARGUMENTS` and apply this routing logic:
 

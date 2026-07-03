@@ -1,6 +1,6 @@
 ---
 name: feature-status
-description: Show the status of all active openpowers changes — openspec list output enriched with worktree and branch state, blocked indicators, and next-action hints per change. Use via /feature with no arguments.
+description: Show the status of all active openpowers changes — openspec list output enriched with worktree and branch state, blocked indicators, and next-action hints per change. Use via /openpowers:feature with no arguments.
 ---
 
 Show the current state of all active features.
@@ -16,7 +16,7 @@ openspec list
 ```
 
 If the output is empty, tell the user:
-"No active changes. Use `/feature \"describe what you want to build\"` to start one."
+"No active changes. Use `/openpowers:feature \"describe what you want to build\"` to start one."
 Then stop.
 
 ---
@@ -51,18 +51,18 @@ Print a table with one row per change:
 
 | Change | Worktree | Commits ahead | Next action |
 |---|---|---|---|
-| `0001-add-auth` | active | 4 | `/feature deliver 0001-add-auth` |
-| `0002-add-export` | none | — | `/feature implement 0002-add-export` |
+| `c0001-add-auth` | active | 4 | `/openpowers:feature deliver c0001-add-auth` |
+| `c0002-add-export` | none | — | `/openpowers:feature implement c0002-add-export` |
 
 **Next action logic:**
-- No worktree, `tasks.md` absent → `/feature propose <change-name>` (spec incomplete)
-- No worktree, `tasks.md` present → `/feature implement <change-name>`
-- Worktree exists, commits ahead > 0 → `/feature deliver <change-name>`
-- Worktree exists, commits ahead = 0, unchecked tasks remain in `tasks.md` → implementation not started; `/feature implement <change-name>`
+- No worktree, `tasks.md` absent → `/openpowers:feature propose <change-name>` (spec incomplete)
+- No worktree, `tasks.md` present → `/openpowers:feature implement <change-name>`
+- Worktree exists, commits ahead > 0 → `/openpowers:feature deliver <change-name>`
+- Worktree exists, commits ahead = 0, unchecked tasks remain in `tasks.md` → implementation not started; `/openpowers:feature implement <change-name>`
 - Worktree exists, commits ahead = 0, all tasks checked → branch may be behind main or commits were squashed; check with `git log main..HEAD` in the worktree
 
 ---
 
 ## Step 4: Show hint
 
-"Use `/feature \"description\"` to start a new feature."
+"Use `/openpowers:feature \"description\"` to start a new feature."

@@ -1,13 +1,16 @@
 ---
 name: feature-implement
-description: Implement a feature from its openspec change. Sets up a git worktree, builds an execution brief, executes via subagents, then hands off to feature-deliver for delivery. Use via /feature implement <name>.
+description: Implement a feature from its openspec change. Sets up a git worktree, builds an execution brief, executes via subagents, then hands off to feature-deliver for delivery. Use via /openpowers:feature implement <name>.
 ---
 
 Implement a feature from its openspec change.
 
 **Announce at start:** "I'm using the feature-implement skill to implement this feature."
 
-**Input:** A change name (e.g., `0001-add-user-auth`). If not provided in `$ARGUMENTS`, resolve it.
+**Input:** A change name like `c0001-add-user-auth`. If not provided in `$ARGUMENTS`, resolve it.
+
+Throughout this skill, `<change-name>` is a placeholder for that resolved name.
+Always substitute the real value — never type an example literally.
 
 ---
 
@@ -27,7 +30,7 @@ openspec list --json
 ```
 Display the available changes and ask the user to select one.
 
-Announce: "Implementing change: **0001-add-user-auth**"
+Announce: "Implementing change: **<change-name>**"
 
 ---
 
@@ -35,16 +38,16 @@ Announce: "Implementing change: **0001-add-user-auth**"
 
 Check change status:
 ```bash
-openspec status --change "0001-add-user-auth" --json
+openspec status --change "<change-name>" --json
 ```
 
 Read all context files:
-- `openspec/changes/0001-add-user-auth/proposal.md`
-- `openspec/changes/0001-add-user-auth/design.md`
-- `openspec/changes/0001-add-user-auth/tasks.md`
+- `openspec/changes/<change-name>/proposal.md`
+- `openspec/changes/<change-name>/design.md`
+- `openspec/changes/<change-name>/tasks.md`
 - `guidelines.md`
 
-If any required artifact is missing, stop: "The spec for 0001-add-user-auth is incomplete. Run `/feature propose 0001-add-user-auth` to complete the missing artifacts before implementing."
+If any required artifact is missing, stop: "The spec for <change-name> is incomplete. Run `/openpowers:feature propose <change-name>` to complete the missing artifacts before implementing."
 
 Retain the content of all three spec files in context — Step 5 will use them directly without re-reading.
 
@@ -56,8 +59,8 @@ Retain the content of all three spec files in context — Step 5 will use them d
 
 The skill will:
 - Detect if already in an isolated workspace (skip creation if so)
-- Create branch `feature/0001-add-user-auth`
-- Place the worktree at `.worktrees/feature-0001-add-user-auth` (or existing `.worktrees/` dir)
+- Create branch `feature/<change-name>`
+- Place the worktree at `.worktrees/feature-<change-name>` (or existing `.worktrees/` dir)
 - Install project dependencies
 - Verify a clean test baseline before implementation begins
 
@@ -96,7 +99,7 @@ All tasks are complete and tests are green. Ask the user:
 
 "Implementation of **<change-name>** is done. Ready to deliver?
 - **Yes** → I'll run the delivery sequence (code review, history cleanup, tag, archive, land).
-- **No** → Stop here. Run `/feature deliver <change-name>` whenever you're ready."
+- **No** → Stop here. Run `/openpowers:feature deliver <change-name>` whenever you're ready."
 
 If the user confirms: **REQUIRED SKILL:** Use `feature-deliver` with `<change-name>` as input.
 If the user declines: stop. Do not invoke feature-deliver.
