@@ -142,30 +142,36 @@ next-action hint per change (`implement`, `deliver`, `propose`, or investigate).
 
 ## Feature lifecycle
 
+Colors show which plugin owns each step: **openpowers** orchestrates and owns
+git/worktree mechanics, **superpowers** provides the brainstorming, TDD, review,
+and landing skills, and **openspec** owns the spec artifacts.
+
+```mermaid
+flowchart TD
+    A["/openpowers:feature &quot;add auth&quot;"] --> B[brainstorming]
+    B --> C[openspec change created + committed]
+    C --> D["/openpowers:feature implement c0001-add-auth"]
+    D --> E[worktree + branch created]
+    E --> F[execution brief synthesised from spec artifacts]
+    F --> G[TDD execution via subagents]
+    G --> H["/openpowers:feature deliver c0001-add-auth"]
+    H --> I[code review]
+    I --> J[branch history cleaned]
+    J --> K[delivery tag created]
+    K --> L[openspec change archived → specs/ updated]
+    L --> M[merge or PR]
+
+    class A,D,H,E,F,J,K openpowers
+    class B,G,I,M superpowers
+    class C,L openspec
+
+    classDef openpowers fill:#6f42c1,stroke:#4c2889,color:#fff
+    classDef superpowers fill:#1f6feb,stroke:#144a9e,color:#fff
+    classDef openspec fill:#2da44e,stroke:#1a6e34,color:#fff
 ```
-/openpowers:feature "add auth"
-    ↓
-  brainstorming (superpowers)
-    ↓
-  openspec change created + committed
-    ↓
-/openpowers:feature implement c0001-add-auth
-    ↓
-  worktree + branch created
-    ↓
-  execution brief synthesised from spec artifacts
-    ↓
-  TDD execution via subagents
-    ↓
-/openpowers:feature deliver c0001-add-auth
-    ↓
-  code review
-    ↓
-  branch history cleaned
-    ↓
-  delivery tag created
-    ↓
-  openspec change archived → specs/ updated
-    ↓
-  merge or PR
-```
+
+| Legend | Plugin | Owns |
+|---|---|---|
+| 🟣 | **openpowers** | Orchestration, entry commands, git worktree/branch, tag, brief synthesis |
+| 🔵 | **superpowers** | Brainstorming, TDD subagents, code review, branch landing |
+| 🟢 | **openspec** | Spec change artifacts, archive into living specs |
