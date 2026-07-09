@@ -55,7 +55,9 @@ Before invoking, pass the following instruction as additional context to the bra
 
 > "Read `guidelines.md` at the repo root for architecture and coding standards before shaping the design. This feature must follow the architecture style described in the Architecture section of guidelines.md. Always present a 'simpler alternative' trade-off — the designer must consciously choose complexity over simplicity, not arrive at it by default."
 
-The brainstorming skill will ask clarifying questions, propose approaches, step through design sections, and save the result to `docs/superpowers/specs/YYYY-MM-DD-<name>-design.md` (gitignored — temporal).
+The brainstorming skill will ask clarifying questions, propose approaches, and step through design sections. It may save a scratch design file under `docs/superpowers/specs/` (gitignored, temporal) — treat that as throwaway thinking, **not** as a spec. The openspec artifacts written in Step 5 are the source of truth.
+
+**Retain the approved design in your context.** Step 5 writes the openspec artifacts directly from it — do not round-trip through the scratch file.
 
 Do NOT proceed to Step 4 until the user has approved the brainstorming design.
 
@@ -79,22 +81,36 @@ already exists — that is expected; continue to Step 5 to regenerate artifacts.
 
 ## Step 5: Generate openspec artifacts
 
-Use the brainstorming design from `docs/superpowers/specs/` as the source of truth. Run each instruction command and follow its output to write the artifact:
+**Source of truth:** the approved design **already in your context** from Step 3 — do
+NOT re-read the scratch file in `docs/superpowers/specs/`. (On re-entry, where Step 3
+was skipped, read the existing `openspec/changes/<change-name>/` artifacts and treat
+the user's revision request as the delta.)
 
+**proposal.md — always:**
 ```bash
 openspec instructions proposal --change <change-name>
 ```
-Follow the instructions to write `openspec/changes/<change-name>/proposal.md`. Base all content on the approved brainstorming design — do not invent new scope.
+Follow the instructions to write `openspec/changes/<change-name>/proposal.md`. Base all content on the approved design — do not invent new scope.
 
-```bash
-openspec instructions design --change <change-name>
-```
-Follow the instructions to write `openspec/changes/<change-name>/design.md`.
+**design.md — only when warranted:**
 
+Write a design doc only if the change has **non-obvious technical decisions** — a new
+architectural boundary, a data-model or API contract, or a trade-off between approaches
+that a reviewer could not infer from the proposal. For a small, mechanical, or
+single-approach change, skip it.
+
+- If warranted:
+  ```bash
+  openspec instructions design --change <change-name>
+  ```
+  Follow the instructions to write `openspec/changes/<change-name>/design.md`.
+- If skipped: announce "Skipping design.md — no non-obvious technical decisions." Do not create the file.
+
+**tasks.md — always:**
 ```bash
 openspec instructions tasks --change <change-name>
 ```
-Follow the instructions to write `openspec/changes/<change-name>/tasks.md`. Each task must map to a brainstormed deliverable.
+Follow the instructions to write `openspec/changes/<change-name>/tasks.md`. Each task must map to a deliverable from the approved design.
 
 ---
 

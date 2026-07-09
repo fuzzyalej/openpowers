@@ -42,14 +42,14 @@ openspec status --change "<change-name>" --json
 ```
 
 Read all context files:
-- `openspec/changes/<change-name>/proposal.md`
-- `openspec/changes/<change-name>/design.md`
-- `openspec/changes/<change-name>/tasks.md`
+- `openspec/changes/<change-name>/proposal.md` (required)
+- `openspec/changes/<change-name>/design.md` (optional — may not exist for small changes)
+- `openspec/changes/<change-name>/tasks.md` (required)
 - `guidelines.md`
 
-If any required artifact is missing, stop: "The spec for <change-name> is incomplete. Run `/openpowers:feature propose <change-name>` to complete the missing artifacts before implementing."
+If `proposal.md` or `tasks.md` is missing, stop: "The spec for <change-name> is incomplete. Run `/openpowers:feature propose <change-name>` to complete the missing artifacts before implementing." A missing `design.md` is expected for simple changes — proceed without it.
 
-Retain the content of all three spec files in context — Step 5 will use them directly without re-reading.
+Read these **once**, to synthesize the brief in Step 5. After the brief exists, it becomes the working context — do **not** keep carrying the raw `proposal.md`/`design.md` text through the rest of the run. Retain only the brief and the `tasks.md` checklist. If a specific task later needs a detail the brief omitted, the subagent assigned to it re-reads that one file on demand.
 
 ---
 
@@ -72,12 +72,13 @@ Do NOT override the skill's directory or branch logic.
 
 Using the content already read in Step 3, plus `guidelines.md` (read it now if not already in context):
 
-Synthesise a concise execution brief (not a full plan document) as a markdown block in this session. It must contain:
+Synthesise a **compact shared header** (not a full plan document) as a markdown block in this session. This header is small on purpose — it gets prepended to every subagent dispatch in Step 6, so keep it tight. It must contain:
 
 1. **Goal** — one sentence from the proposal's "Why" section.
-2. **Architecture notes** — key constraints from `design.md` relevant to implementation order.
-3. **Task list** — the unchecked tasks from `tasks.md` verbatim, preserving their `- [ ]` format.
-4. **Test command** — the test runner from `guidelines.md` (e.g., `rtk vitest`).
+2. **Architecture notes** — 3–5 bullet constraints relevant to implementation order, distilled from `design.md` if it exists, otherwise from the proposal and `guidelines.md`. Bullets, not prose; do not paste `design.md` in whole.
+3. **Test command** — the test runner from `guidelines.md` (e.g., `rtk vitest`).
+
+Keep the full unchecked task list (from `tasks.md`, verbatim `- [ ]` format) separately as the checklist — it is *not* part of the per-subagent header.
 
 Do NOT write this to disk. Pass it as inline context to Step 6.
 
@@ -90,6 +91,20 @@ Fallback: `superpowers:executing-plans` (runs in this session with checkpoints).
 
 Execution follows TDD: write failing test → implement minimal code → pass → commit.
 A fresh subagent handles each task. Each task is reviewed before the next begins.
+
+**Scope each subagent to one task.** Dispatch each subagent with *only* the compact
+shared header from Step 5 plus that subagent's **single** task line — never the full
+proposal, design, or the whole task list. This keeps per-subagent context to
+`header + one task` instead of `header + entire spec`. If a task genuinely needs a
+detail the header omitted, that subagent re-reads the one relevant file itself.
+
+**Commit convention (enables mechanical autosquash at delivery).** Each task's first
+commit uses a normal Conventional Commit (`feat:`, `test:`, `fix:` for a genuinely new
+concern). Any *correction* to work done earlier in this branch commits with
+`git commit --fixup <sha-of-the-commit-it-fixes>` so its message is `fixup! <subject>`.
+Do **not** hand-write throwaway `fix: oops` commits for in-branch corrections —
+`--fixup` lets `feature-deliver` collapse history with `git rebase --autosquash` and
+no manual SHA transcription.
 
 ---
 

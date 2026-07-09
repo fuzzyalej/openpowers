@@ -114,10 +114,9 @@ Documentation, Feature Conventions) byte-identical across every project.
    grep -n "{{" guidelines.md && echo "UNFILLED PLACEHOLDERS — fix before continuing" || echo "OK"
    ```
 
-Commit:
+Stage it (a single commit for all init files happens in Step 8):
 ```bash
 rtk git add guidelines.md
-rtk git commit -m "chore: add project guidelines"
 ```
 
 ---
@@ -127,10 +126,9 @@ rtk git commit -m "chore: add project guidelines"
 If `CLAUDE.md` exists, read it first. Add `@guidelines.md` on a new line if not already present.
 If `CLAUDE.md` does not exist, create it containing only: `@guidelines.md`
 
-Commit:
+Stage it:
 ```bash
 rtk git add CLAUDE.md
-rtk git commit -m "chore: link guidelines.md from CLAUDE.md"
 ```
 
 ---
@@ -177,10 +175,9 @@ Stack-specific entries based on Question 1 answer:
 - Rust → `target/`
 - Java/Kotlin → `target/`, `*.class`, `*.jar`, `.gradle/`
 
-Commit:
+Stage it:
 ```bash
 rtk git add .gitignore
-rtk git commit -m "chore: add .gitignore with security and stack-specific rules"
 ```
 
 ---
@@ -194,18 +191,27 @@ Create these files (the directories are implied):
 - `docs/processes/.gitkeep`
 - `docs/api/.gitkeep`
 
-Commit:
+Stage it:
 ```bash
 rtk git add docs/
-rtk git commit -m "chore: scaffold docs/ directory structure"
 ```
 
 ---
 
-## Step 8: Confirm
+## Step 8: Commit everything in one commit
+
+All init files are staged. Commit them together:
+
+```bash
+rtk git commit -m "chore: initialize openpowers project (guidelines, CLAUDE.md, .gitignore, docs scaffold)"
+```
+
+---
+
+## Step 9: Confirm
 
 Tell the user:
-"Project initialized. Four commits added:
+"Project initialized in one commit:
 - guidelines.md (architecture, SOLID, security, testing, linting, stack)
 - CLAUDE.md updated to load guidelines
 - .gitignore with security and stack-specific rules

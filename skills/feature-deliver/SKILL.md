@@ -64,68 +64,37 @@ Do NOT proceed to Step 5 until all blocking review findings are resolved and com
 
 ## Step 5: Clean up branch history
 
-Before tagging and merging, rewrite the branch commits into a clean, logical sequence so `git log` on main tells a clear story.
+Before tagging and merging, rewrite the branch commits into a clean, logical sequence so `git log` on main tells a clear story. `feature-implement` records in-branch corrections as `fixup!` commits, so the common case collapses mechanically — no manual SHA transcription.
 
-**5a — Gather the commits:**
+**5a — Inspect the branch:**
 
 ```bash
 rtk git log $(git merge-base HEAD main)..HEAD --oneline
 ```
 
-Read this output carefully. You need the exact SHAs and messages for step 5c.
+**5b — Collapse fixups mechanically:**
 
-**5b — Apply the squash policy:**
-
-Group commits by logical unit, not by when they were made:
-
-| Commit type | What to do |
-|---|---|
-| `fix:` correcting something added in this branch | `fixup` into the feature commit it belongs to |
-| `chore:` for infra (gitignore, config, attrs) | group into one setup commit at the start |
-| `docs:` or `test:` for a single feature | `fixup` or `squash` into that feature's commit |
-| Independent `feat:` or standalone `docs:` | keep as its own `pick` |
-
-Goal: each commit represents one logical unit of work. A reviewer can read the log and understand what was built with no noise.
-
-**5c — Write the rebase sequence using the real SHAs from 5a:**
-
-For example, if step 5a showed:
-```
-abc1234 feat: add user repository
-def5678 fix: correct null check in repository
-ghi9012 chore: add .gitignore entries
-```
-
-Then the sequence would be:
-```
-pick ghi9012 chore: add .gitignore entries
-pick abc1234 feat: add user repository
-fixup def5678 fix: correct null check in repository
-```
-
-Write the actual sequence (with real SHAs from your log output) to `/tmp/rebase-todo`:
+Run the autosquash rebase non-interactively. `--autosquash` arranges every `fixup!`/`squash!` commit under its target automatically, and `GIT_SEQUENCE_EDITOR=true` accepts that arrangement without opening an editor:
 
 ```bash
-cat > /tmp/rebase-todo << 'EOF'
-pick <real-sha-1> <real-message-1>
-fixup <real-sha-2> <real-message-2>
-pick <real-sha-3> <real-message-3>
-EOF
+GIT_SEQUENCE_EDITOR=true rtk git rebase -i --autosquash $(git merge-base HEAD main)
 ```
 
-**5d — Run the non-interactive rebase:**
+**5c — Verify, and only hand-edit if noise remains:**
+
+```bash
+rtk git log $(git merge-base HEAD main)..HEAD --oneline
+```
+
+Each commit should now be one logical unit. If the log is already clean, continue to Step 6.
+
+If some noise survives (e.g. an early ad-hoc `fix:` that predates the `--fixup` convention, or several `chore:` infra commits worth grouping into one), fall back to a manual reorder for *those* commits only:
 
 ```bash
 GIT_SEQUENCE_EDITOR="cp /tmp/rebase-todo" rtk git rebase -i $(git merge-base HEAD main)
 ```
 
-**5e — Verify the result:**
-
-```bash
-rtk git log --oneline
-```
-
-Confirm the log matches the intended clean sequence.
+Write `/tmp/rebase-todo` with real SHAs from 5a, applying this policy: `chore:` infra → one setup `pick` at the start; a `fix:`/`docs:`/`test:` that belongs to a feature commit → `fixup`/`squash` into it; independent `feat:` → its own `pick`. Then re-run 5c to confirm.
 
 ---
 
