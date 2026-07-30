@@ -8,6 +8,7 @@
     "./skills/feature-propose",
     "./skills/feature-implement",
     "./skills/feature-deliver",
+    "./skills/feature-abandon",
     "./skills/feature-status"
   ]
 }

@@ -117,6 +117,17 @@ Runs the full delivery sequence: task-completion gate, documentation gate, code 
 branch history cleanup, then — only once you have committed to landing — openspec
 archive, delivery tag, and merge or PR.
 
+### Abandon a feature
+
+```
+/openpowers:feature abandon c0001-add-user-auth
+```
+
+Cleans up a change you decided not to build — worktree, branch, openspec change, and
+delivery tag. Shows the full inventory including any unmerged commits, and requires you
+to type the change name back before deleting anything. Refuses to touch a change that
+has already been delivered and archived.
+
 ### Check status
 
 ```

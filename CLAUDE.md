@@ -19,6 +19,7 @@ All interaction happens through `/openpowers:feature`:
 | `/openpowers:feature propose <name>` | Re-enter spec flow for an existing change (revise artifacts) |
 | `/openpowers:feature implement <name>` | Implement a specced feature |
 | `/openpowers:feature deliver <name>` | Run delivery: code review, history cleanup, tag, archive, land |
+| `/openpowers:feature abandon <name>` | Delete a change you decided not to build: worktree, branch, spec, tag |
 
 ## Key conventions
 
