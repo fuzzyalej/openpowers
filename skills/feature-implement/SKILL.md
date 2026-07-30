@@ -49,6 +49,11 @@ Read all context files:
 
 If `proposal.md` or `tasks.md` is missing, stop: "The spec for <change-name> is incomplete. Run `/openpowers:feature propose <change-name>` to complete the missing artifacts before implementing." A missing `design.md` is expected for simple changes — proceed without it.
 
+**Resuming an interrupted run is normal.** `tasks.md` is a live record — each task is
+ticked as it lands. If some boxes are already `- [x]`, that work is done and committed;
+carry only the remaining `- [ ]` lines forward as the checklist. Do not re-implement a
+ticked task.
+
 Read these **once**, to synthesize the brief in Step 5. After the brief exists, it becomes the working context — do **not** keep carrying the raw `proposal.md`/`design.md` text through the rest of the run. Retain only the brief and the `tasks.md` checklist. If a specific task later needs a detail the brief omitted, the subagent assigned to it re-reads that one file on demand.
 
 ---
@@ -78,7 +83,7 @@ Synthesise a **compact shared header** (not a full plan document) as a markdown 
 2. **Architecture notes** — 3–5 bullet constraints relevant to implementation order, distilled from `design.md` if it exists, otherwise from the proposal and `guidelines.md`. Bullets, not prose; do not paste `design.md` in whole.
 3. **Test command** — the test runner from `guidelines.md` (e.g., `rtk vitest`).
 
-Keep the full unchecked task list (from `tasks.md`, verbatim `- [ ]` format) separately as the checklist — it is *not* part of the per-subagent header.
+Keep the remaining unchecked task list (from `tasks.md`, verbatim `- [ ]` format) separately as the checklist — it is *not* part of the per-subagent header.
 
 Do NOT write this to disk. Pass it as inline context to Step 6.
 
@@ -98,6 +103,14 @@ proposal, design, or the whole task list. This keeps per-subagent context to
 `header + one task` instead of `header + entire spec`. If a task genuinely needs a
 detail the header omitted, that subagent re-reads the one relevant file itself.
 
+**Tick each task as it lands.** Before a subagent commits its task, it flips that
+task's line in `openspec/changes/<change-name>/tasks.md` from `- [ ]` to `- [x]` and
+stages the file with the rest of its work, so the tick and the code arrive in the same
+commit. This makes `tasks.md` a live progress record rather than a checklist rewritten
+at the end: `/openpowers:feature` can report real progress, an interrupted run resumes
+from the first unticked line, and delivery can verify completion instead of asserting
+it. Never tick a task whose tests are not green, and never tick ahead of the work.
+
 **Commit convention (enables mechanical autosquash at delivery).** Each task's first
 commit uses a normal Conventional Commit (`feat:`, `test:`, `fix:` for a genuinely new
 concern). Any *correction* to work done earlier in this branch commits with
@@ -110,11 +123,13 @@ no manual SHA transcription.
 
 ## Step 7: Offer delivery
 
-All tasks are complete and tests are green. Ask the user:
+Every task in `tasks.md` is ticked and tests are green. Ask the user:
 
 "Implementation of **<change-name>** is done. Ready to deliver?
 - **Yes** → I'll run the delivery sequence (code review, history cleanup, tag, archive, land).
 - **No** → Stop here. Run `/openpowers:feature deliver <change-name>` whenever you're ready."
 
-If the user confirms: **REQUIRED SKILL:** Use `feature-deliver` with `<change-name>` as input.
+If the user confirms: **REQUIRED SKILL:** Use `feature-deliver` with `<change-name>` as
+input, and tell it **tests were verified green in this session** so it can skip its own
+redundant test run.
 If the user declines: stop. Do not invoke feature-deliver.

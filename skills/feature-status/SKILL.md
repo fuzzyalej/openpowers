@@ -1,6 +1,6 @@
 ---
 name: feature-status
-description: Show the status of all active openpowers changes — openspec list output enriched with worktree and branch state, blocked indicators, and next-action hints per change. Use via /openpowers:feature with no arguments.
+description: Show the status of all active openpowers changes — openspec list output enriched with worktree and branch state, task progress, and next-action hints per change. Use via /openpowers:feature with no arguments.
 ---
 
 Show the current state of all active features.
@@ -9,60 +9,40 @@ Show the current state of all active features.
 
 ---
 
-## Step 1: List active changes
+## Step 1: Render the status table
 
 ```bash
-openspec list
+node "${CLAUDE_PLUGIN_ROOT}/scripts/status.mjs"
 ```
 
-If the output is empty, tell the user:
+The script owns all of it — the openspec change list, worktree detection, commits
+ahead of the repo's default branch, `tasks.md` progress, and the next-action hint
+per change. Do **not** re-derive any column by hand or run supplementary git
+commands; every input is deterministic and the script has already read them.
+
+If the output is `NO_CHANGES`, tell the user:
 "No active changes. Use `/openpowers:feature \"describe what you want to build\"` to start one."
 Then stop.
 
----
-
-## Step 2: Gather worktree and branch state
-
-Run once to get all worktree paths:
-
-```bash
-rtk git worktree list --porcelain
-```
-
-From the output, identify which changes have a worktree at `.worktrees/feature-<change-name>`.
-
-For changes with a worktree, gather commits-ahead counts in a single pass:
-
-```bash
-for wt in .worktrees/feature-*/; do
-  name=$(basename "$wt" | sed 's/^feature-//')
-  count=$(git -C "$wt" log --oneline main..HEAD 2>/dev/null | wc -l | tr -d ' ')
-  echo "$name $count"
-done
-```
-
-Build a map of `change-name → commits-ahead` from the output. Do not run a separate subprocess per change.
+Otherwise print the table exactly as emitted.
 
 ---
 
-## Step 3: Display enriched status table
-
-Print a table with one row per change:
-
-| Change | Worktree | Commits ahead | Next action |
-|---|---|---|---|
-| `c0001-add-auth` | active | 4 | `/openpowers:feature deliver c0001-add-auth` |
-| `c0002-add-export` | none | — | `/openpowers:feature implement c0002-add-export` |
-
-**Next action logic:**
-- No worktree, `tasks.md` absent → `/openpowers:feature propose <change-name>` (spec incomplete)
-- No worktree, `tasks.md` present → `/openpowers:feature implement <change-name>`
-- Worktree exists, commits ahead > 0 → `/openpowers:feature deliver <change-name>`
-- Worktree exists, commits ahead = 0, unchecked tasks remain in `tasks.md` → implementation not started; `/openpowers:feature implement <change-name>`
-- Worktree exists, commits ahead = 0, all tasks checked → branch may be behind main or commits were squashed; check with `git log main..HEAD` in the worktree
-
----
-
-## Step 4: Show hint
+## Step 2: Show hint
 
 "Use `/openpowers:feature \"description\"` to start a new feature."
+
+---
+
+## Reference: how the script decides "Next action"
+
+You do not need to apply these rules — they are documented so the output can be
+explained if the user asks.
+
+| State | Condition | Next action |
+|---|---|---|
+| spec incomplete | no `tasks.md`, or it has no checkboxes | `propose` |
+| not started | tasks exist, no worktree — or a worktree with zero tasks ticked | `implement` |
+| in progress | worktree exists, some tasks ticked, some open | `implement` (resumes) |
+| ready | worktree exists, all tasks ticked, commits ahead > 0 | `deliver` |
+| check | all tasks ticked but no commits ahead | inspect the worktree manually |

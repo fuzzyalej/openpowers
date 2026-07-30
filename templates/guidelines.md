@@ -37,7 +37,8 @@
 - Architecture decisions, setup guides, CLI references, and specialized processes
   live in docs/ and are committed as part of the feature that introduces them.
 - Documentation is updated before the delivery tag — it is part of done.
-- docs/superpowers/ is the only gitignored subdirectory (temporal plans and specs).
+- openspec/changes/ holds the spec of record for in-progress features; there is no
+  separate design document.
 
 ## Stack
 - Language: {{LANGUAGE}}
@@ -52,6 +53,5 @@
   The `c` prefix is required because openspec rejects change names that start with a digit.
 - Branch: feature/c0001-add-auth
 - Worktree: .worktrees/feature-c0001-add-auth (managed by superpowers)
-- Delivery tag: delivered/c0001-add-auth (created before merge)
-- docs/superpowers/ is temporal, never committed
-- openspec/ and docs/ (except docs/superpowers/) are committed
+- Delivery tag: delivered/c0001-add-auth (created before merge, only once the branch lands)
+- openspec/ and docs/ are committed

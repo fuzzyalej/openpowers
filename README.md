@@ -113,8 +113,9 @@ tasks artifacts. Use when the spec is incomplete or needs revision before implem
 /openpowers:feature deliver c0001-add-user-auth
 ```
 
-Runs the full delivery sequence: code review, branch history cleanup, delivery tag,
-openspec archive, and branch landing (merge or PR).
+Runs the full delivery sequence: task-completion gate, documentation gate, code review,
+branch history cleanup, then — only once you have committed to landing — openspec
+archive, delivery tag, and merge or PR.
 
 ### Check status
 
@@ -122,8 +123,9 @@ openspec archive, and branch landing (merge or PR).
 /openpowers:feature
 ```
 
-Shows all active changes with worktree state, commits ahead of main, and a
-next-action hint per change (`implement`, `deliver`, `propose`, or investigate).
+Shows all active changes with worktree state, task progress, commits ahead of the
+repo's default branch, and a next-action hint per change (`implement`, `deliver`,
+`propose`, or investigate).
 
 ## What gets committed
 
@@ -138,7 +140,6 @@ next-action hint per change (`implement`, `deliver`, `propose`, or investigate).
 | `docs/cli/` | Yes | CLI command reference |
 | `docs/processes/` | Yes | Specialized processes |
 | `docs/api/` | Yes | API reference |
-| `docs/superpowers/` | No | Temporal: brainstorming, plans |
 | `.worktrees/` | No | Git worktree working dirs |
 
 ## Feature lifecycle
@@ -158,11 +159,13 @@ flowchart TD
     G --> H["/openpowers:feature deliver c0001-add-auth"]
     H --> I[code review]
     I --> J[branch history cleaned]
-    J --> K[delivery tag created]
-    K --> L[openspec change archived → specs/ updated]
-    L --> M[merge or PR]
+    J --> N{landing decision}
+    N -->|keep open / discard| O[stop: nothing archived or tagged]
+    N -->|merge / PR| L[openspec change archived → specs/ updated]
+    L --> K[delivery tag created]
+    K --> M[merge or PR]
 
-    class A,D,H,E,F,J,K openpowers
+    class A,D,H,E,F,J,K,N,O openpowers
     class B,G,I,M superpowers
     class C,L openspec
 

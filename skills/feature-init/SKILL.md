@@ -168,6 +168,10 @@ Thumbs.db
 docs/superpowers/
 ```
 
+(`docs/superpowers/` is not part of the openpowers workflow — nothing writes there. The
+entry stays as a backstop in case an invoked superpowers skill leaves a scratch file
+behind, so it can never be committed by accident.)
+
 Stack-specific entries based on Question 1 answer:
 - TypeScript/Node → `node_modules/`, `dist/`, `.next/`, `.turbo/`, `*.tsbuildinfo`
 - Python → `__pycache__/`, `*.pyc`, `.venv/`, `dist/`, `*.egg-info/`

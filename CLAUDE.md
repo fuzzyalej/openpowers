@@ -27,7 +27,9 @@ All interaction happens through `/openpowers:feature`:
   Numbering and re-entry detection are computed by `scripts/resolve-change-name.mjs`,
   not by hand.
 - Branches: `feature/<change-name>`
-- Delivery tags: `delivered/<change-name>` (created before merge)
-- Specs (openspec/): committed, source of truth
-- Plans and brainstorming (docs/superpowers/): gitignored, temporal
+- Delivery tags: `delivered/<change-name>` (created before merge, only once the branch lands)
+- The default branch is resolved by `scripts/default-branch.mjs` — never hardcode `main`.
+- The status table is computed by `scripts/status.mjs` — never re-derive its columns by hand.
+- Specs (openspec/): committed, source of truth. There is no intermediate design document.
+- `tasks.md` is a live progress record: each task is ticked in the same commit as its work.
 - Committed docs (docs/architecture, docs/setup, etc.): updated as part of each feature delivery

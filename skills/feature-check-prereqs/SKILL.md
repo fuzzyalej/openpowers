@@ -1,11 +1,11 @@
 ---
 name: feature-check-prereqs
-description: Verify that openpowers prerequisites are met. Checks openspec CLI and required superpowers skills. Called at the start of feature-init, feature-propose, and feature-implement. Accepts an optional scope argument ("propose" or "implement") to widen the superpowers check.
+description: Verify that openpowers prerequisites are met. Checks that the openspec CLI is installed. Called at the start of feature-init, feature-propose, and feature-implement.
 ---
 
 Verify openpowers prerequisites.
 
-**Input:** Optional scope — `implement`. Omit for the default (brainstorming-only) check.
+**Input:** Ignored. Kept for compatibility with callers that pass a scope.
 
 ---
 
@@ -20,20 +20,21 @@ If this fails, stop and tell the user:
 
 ---
 
-## Step 2: Check superpowers skills
+## Step 2: Confirm
 
-Verify the `Skill` tool can reach `superpowers:brainstorming`.
-
-If scope is `implement`, also verify:
-- `superpowers:using-git-worktrees`
-- `superpowers:subagent-driven-development`
-- `superpowers:finishing-a-development-branch`
-
-If any skill is unreachable, stop and tell the user:
-"The superpowers plugin is required. Install it with: `/plugins install superpowers@claude-plugins-official`"
+Return silently with no output. The calling skill continues.
 
 ---
 
-## Step 3: Confirm
+## Note: superpowers is not checked here
 
-Return silently with no output if all checks pass. The calling skill continues.
+There is no tool that answers "can the `Skill` tool reach `superpowers:brainstorming`?",
+so a check for it could only be guesswork — and a wrong guess either blocks a working
+setup or waves through a broken one. The superpowers skills are invoked directly by
+`feature-propose`, `feature-implement`, and `feature-deliver`; if the plugin is missing,
+those calls fail at the point of use with a clear error.
+
+When a `superpowers:*` skill invocation fails anywhere in the workflow, stop and tell
+the user:
+
+"The superpowers plugin is required. Install it with: `/plugins install superpowers@claude-plugins-official`"

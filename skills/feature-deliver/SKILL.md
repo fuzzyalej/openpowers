@@ -1,6 +1,6 @@
 ---
 name: feature-deliver
-description: Run the delivery sequence for a completed feature — mark tasks done, documentation gate, clean branch history, create delivery tag, archive the openspec change, and land the branch. Use via /openpowers:feature deliver <name> or called from feature-implement after all tasks are green.
+description: Run the delivery sequence for a completed feature — verify tasks, documentation gate, code review, clean branch history, then archive, tag, and land. Use via /openpowers:feature deliver <name> or called from feature-implement after all tasks are green.
 ---
 
 Complete the delivery sequence for a feature whose implementation is done and tests are green.
@@ -13,27 +13,64 @@ Throughout this skill, `<change-name>` is a placeholder for that name — always
 
 ---
 
-## Step 1: Confirm readiness
+## Step 0: Resolve the default branch
 
-Verify:
-1. `guidelines.md` exists at the repo root. If it does not, stop: "guidelines.md is missing. Run `/openpowers:feature init` to set up the project before delivering."
-2. All tests pass: check `guidelines.md` for the test framework and test command, then run it. If tests fail, stop: "Tests must be green before delivery. Fix the failures and re-run `/openpowers:feature deliver <change-name>`."
-3. The change has a `tasks.md` at `openspec/changes/<change-name>/tasks.md`.
+Delivery compares this branch against the repo's integration branch, which is not
+always `main`. Resolve it once and reuse it everywhere below as `$BASE`:
+
+```bash
+BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs") && echo "$BASE"
+```
+
+Every later command in this skill that references `$BASE` must run in the same shell
+invocation as its own `BASE=$(...)` assignment, or substitute the resolved value
+literally. Never hardcode `main`.
 
 ---
 
-## Step 2: Mark openspec tasks complete
+## Step 1: Confirm readiness
 
-Read `openspec/changes/<change-name>/tasks.md`.
-
-If all checkboxes are already `- [x]`, skip this step — the file is already up to date.
-
-Otherwise, replace every `- [ ]` with `- [x]`. Write the file back. Then commit:
+Run the cheap checks together:
 
 ```bash
-rtk git add openspec/changes/<change-name>/tasks.md
-rtk git commit -m "spec(<change-name>): mark all tasks complete"
+BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
+test -f guidelines.md && echo "guidelines: ok" || echo "guidelines: MISSING"
+test -f "openspec/changes/<change-name>/tasks.md" && echo "tasks: ok" || echo "tasks: MISSING"
+rtk git log --oneline "$BASE"..HEAD | wc -l
 ```
+
+- `guidelines: MISSING` → stop: "guidelines.md is missing. Run `/openpowers:feature init` to set up the project before delivering."
+- `tasks: MISSING` → stop: "No tasks.md for <change-name>. Run `/openpowers:feature propose <change-name>` first."
+
+**Tests.** If `feature-implement` invoked this skill in the current session and reported
+tests green, say "Tests verified green during implementation — skipping the redundant
+run." and continue. Otherwise read the test command from `guidelines.md` and run it. If
+tests fail, stop: "Tests must be green before delivery. Fix the failures and re-run
+`/openpowers:feature deliver <change-name>`."
+
+---
+
+## Step 2: Verify every task is complete
+
+`feature-implement` ticks each task in the same commit as the work it describes, so
+`tasks.md` already reflects reality. This step **verifies** that record — it does not
+rewrite it.
+
+```bash
+grep -c '^\s*-\s*\[ \]' "openspec/changes/<change-name>/tasks.md" || true
+```
+
+If the count is zero, continue.
+
+If any task is still unticked, list those lines and stop:
+
+"<change-name> has N unfinished tasks. Delivery marks a feature as shipped, so every
+task must be done first. Run `/openpowers:feature implement <change-name>` to resume,
+or remove the tasks you have decided not to do."
+
+Do **not** bulk-flip the boxes to make this check pass — that would assert completion
+rather than confirm it. If the record is wrong because a task was genuinely finished
+without being ticked, tick that one line and commit it with an explanation.
 
 ---
 
@@ -56,7 +93,8 @@ If no: continue immediately.
 
 **REQUIRED SKILL:** Use `superpowers:requesting-code-review` now.
 
-Pass the branch name and change name as context. The review targets the diff between this branch and `main`.
+Pass the branch name and change name as context. The review targets the diff between
+this branch and the default branch resolved in Step 0.
 
 Do NOT proceed to Step 5 until all blocking review findings are resolved and committed.
 
@@ -64,41 +102,93 @@ Do NOT proceed to Step 5 until all blocking review findings are resolved and com
 
 ## Step 5: Clean up branch history
 
-Before tagging and merging, rewrite the branch commits into a clean, logical sequence so `git log` on main tells a clear story. `feature-implement` records in-branch corrections as `fixup!` commits, so the common case collapses mechanically — no manual SHA transcription.
+Before landing, rewrite the branch commits into a clean, logical sequence so `git log`
+on the default branch tells a clear story. `feature-implement` records in-branch
+corrections as `fixup!` commits, so the common case collapses mechanically — no manual
+SHA transcription.
 
 **5a — Inspect the branch:**
 
 ```bash
-rtk git log $(git merge-base HEAD main)..HEAD --oneline
+BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
+rtk git log $(git merge-base HEAD "$BASE")..HEAD --oneline
 ```
 
 **5b — Collapse fixups mechanically:**
 
-Run the autosquash rebase non-interactively. `--autosquash` arranges every `fixup!`/`squash!` commit under its target automatically, and `GIT_SEQUENCE_EDITOR=true` accepts that arrangement without opening an editor:
+`--autosquash` arranges every `fixup!`/`squash!` commit under its target automatically,
+and `GIT_SEQUENCE_EDITOR=true` accepts that arrangement without opening an editor:
 
 ```bash
-GIT_SEQUENCE_EDITOR=true rtk git rebase -i --autosquash $(git merge-base HEAD main)
+BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
+GIT_SEQUENCE_EDITOR=true rtk git rebase -i --autosquash $(git merge-base HEAD "$BASE")
 ```
 
 **5c — Verify, and only hand-edit if noise remains:**
 
+Re-run the 5a command. Each commit should now be one logical unit. If the log is
+already clean, continue to Step 6.
+
+If some noise survives (e.g. an early ad-hoc `fix:` that predates the `--fixup`
+convention, or several `chore:` infra commits worth grouping into one), fall back to a
+manual reorder for *those* commits only:
+
 ```bash
-rtk git log $(git merge-base HEAD main)..HEAD --oneline
+BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
+GIT_SEQUENCE_EDITOR="cp /tmp/rebase-todo" rtk git rebase -i $(git merge-base HEAD "$BASE")
 ```
 
-Each commit should now be one logical unit. If the log is already clean, continue to Step 6.
-
-If some noise survives (e.g. an early ad-hoc `fix:` that predates the `--fixup` convention, or several `chore:` infra commits worth grouping into one), fall back to a manual reorder for *those* commits only:
-
-```bash
-GIT_SEQUENCE_EDITOR="cp /tmp/rebase-todo" rtk git rebase -i $(git merge-base HEAD main)
-```
-
-Write `/tmp/rebase-todo` with real SHAs from 5a, applying this policy: `chore:` infra → one setup `pick` at the start; a `fix:`/`docs:`/`test:` that belongs to a feature commit → `fixup`/`squash` into it; independent `feat:` → its own `pick`. Then re-run 5c to confirm.
+Write `/tmp/rebase-todo` with real SHAs from 5a, applying this policy: `chore:` infra →
+one setup `pick` at the start; a `fix:`/`docs:`/`test:` that belongs to a feature commit
+→ `fixup`/`squash` into it; independent `feat:` → its own `pick`. Then re-run 5c to
+confirm.
 
 ---
 
-## Step 6: Create delivery tag
+## Step 6: Confirm the landing decision
+
+The next two steps are irreversible markers that this feature shipped: the openspec
+archive folds the change into the living spec, and the delivery tag is a permanent
+reference. Neither should exist for a branch that never lands, so settle the landing
+decision **before** creating them.
+
+Ask:
+
+"How should **<change-name>** land?
+1. **Merge** into `$BASE` locally
+2. **Push and open a PR**
+3. **Keep the branch open** — not landing yet
+4. **Discard** the branch"
+
+- **1 or 2** → continue to Step 7. Remember the choice; Step 9 passes it on.
+- **3** → stop: "Nothing archived or tagged. Run `/openpowers:feature deliver <change-name>` when you are ready to land."
+- **4** → stop and hand off: **REQUIRED SKILL:** Use `superpowers:finishing-a-development-branch` and tell it the user chose to discard. Do not archive and do not tag.
+
+---
+
+## Step 7: Archive the openspec change
+
+Archiving on the branch means the merge carries it, rather than leaving a stray
+follow-up commit on the default branch:
+
+```bash
+openspec archive <change-name> -y
+ls openspec/changes/archive/
+```
+
+The change directory should appear with a date prefix. Commit the archive if `openspec`
+left it unstaged:
+
+```bash
+rtk git add openspec/
+rtk git commit -m "spec(<change-name>): archive delivered change"
+```
+
+---
+
+## Step 8: Create the delivery tag
+
+Tag the branch tip, now that it contains everything being delivered:
 
 ```bash
 rtk git tag -a "delivered/<change-name>" \
@@ -107,28 +197,10 @@ rtk git tag -a "delivered/<change-name>" \
 
 ---
 
-## Step 7: Archive the openspec change
-
-```bash
-openspec archive <change-name> -y
-```
-
-Verify:
-```bash
-ls openspec/changes/archive/
-```
-The change directory should appear with a date prefix.
-
----
-
-## Step 8: Land the branch
+## Step 9: Land the branch
 
 **REQUIRED SKILL:** Use `superpowers:finishing-a-development-branch` now.
 
-This skill verifies tests one final time and presents the standard options:
-1. Merge locally
-2. Push and create a PR
-3. Keep the branch open
-4. Discard
-
-Follow the skill's own logic for detecting environment and defaulting the recommendation.
+Tell it which option the user chose in Step 6 so it does not re-ask, and mention that
+tests were verified earlier in this run. Remind it to push the `delivered/<change-name>`
+tag along with the branch if it pushes.
