@@ -51,15 +51,30 @@ a digit.
 
 **REQUIRED SKILL:** Use `superpowers:brainstorming` now.
 
-Before invoking, pass the following instruction as additional context to the brainstorming skill:
+Before invoking, pass the following instructions as additional context to the brainstorming skill:
 
 > "Read `guidelines.md` at the repo root for architecture and coding standards before shaping the design. This feature must follow the architecture style described in the Architecture section of guidelines.md. Always present a 'simpler alternative' trade-off — the designer must consciously choose complexity over simplicity, not arrive at it by default."
+>
+> "Complete brainstorming checklist items 1–5 only — explore context, ask clarifying questions, propose approaches, present design sections, get user approval. **Stop when the user approves the design.** Do not perform items 6–9: do not write a design doc to `docs/superpowers/specs/`, do not run the spec self-review or the file review gate, do not invoke `writing-plans`. In openpowers the openspec artifacts *are* the design doc and item 5's approval *is* the approval gate — writing an intermediate file duplicates both."
 
-The brainstorming skill will ask clarifying questions, propose approaches, and step through design sections. It may save a scratch design file under `docs/superpowers/specs/` (gitignored, temporal) — treat that as throwaway thinking, **not** as a spec. The openspec artifacts written in Step 5 are the source of truth.
+**Retain the approved design in your context.** Step 5 writes the openspec artifacts directly from it — nothing is written to disk between the user's approval and the openspec change.
 
-**Retain the approved design in your context.** Step 5 writes the openspec artifacts directly from it — do not round-trip through the scratch file.
+Do NOT proceed to Step 3.5 until the user has approved the brainstorming design.
 
-Do NOT proceed to Step 4 until the user has approved the brainstorming design.
+---
+
+## Step 3.5: Guard against intermediate files
+
+Brainstorming's own checklist is forcefully worded, so it may write a design doc
+despite the instruction above. Remove any it left behind:
+
+```bash
+rm -f docs/superpowers/specs/*-design.md
+```
+
+That directory is gitignored and temporal by definition, so nothing of value can be
+caught by this. If brainstorming also committed the file, drop that commit before
+continuing.
 
 ---
 
@@ -81,10 +96,10 @@ already exists — that is expected; continue to Step 5 to regenerate artifacts.
 
 ## Step 5: Generate openspec artifacts
 
-**Source of truth:** the approved design **already in your context** from Step 3 — do
-NOT re-read the scratch file in `docs/superpowers/specs/`. (On re-entry, where Step 3
-was skipped, read the existing `openspec/changes/<change-name>/` artifacts and treat
-the user's revision request as the delta.)
+**Source of truth:** the approved design **already in your context** from Step 3. There
+is no intermediate file to read. (On re-entry, where Step 3 was skipped, read the
+existing `openspec/changes/<change-name>/` artifacts and treat the user's revision
+request as the delta.)
 
 **proposal.md — always:**
 ```bash
@@ -116,11 +131,17 @@ Follow the instructions to write `openspec/changes/<change-name>/tasks.md`. Each
 
 ## Step 6: Sanity check
 
-Count lines in `tasks.md` that match `- [ ]`. If the count exceeds 8:
+Re-read the artifacts you just wrote with fresh eyes and fix any of these inline —
+no need to re-review afterwards, just fix and move on:
 
-"This spec has N tasks. Features this large are harder to review and riskier to merge. Consider splitting into two features before implementing. Continue anyway?"
+1. **Placeholders** — any "TBD", "TODO", or empty section in `proposal.md` or `tasks.md`?
+2. **Internal consistency** — does every task map to something the proposal actually asks for, and does the proposal ask for anything no task covers?
+3. **Ambiguity** — could any requirement be read two ways? Pick one and make it explicit.
+4. **Scope** — count lines in `tasks.md` that match `- [ ]`. If the count exceeds 8:
 
-If the user says yes, continue. This is a flag, not a hard block.
+   "This spec has N tasks. Features this large are harder to review and riskier to merge. Consider splitting into two features before implementing. Continue anyway?"
+
+   If the user says yes, continue. This is a flag, not a hard block.
 
 ---
 

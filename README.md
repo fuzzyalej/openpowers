@@ -85,7 +85,8 @@ Prompts for your stack (language, test framework, linter, DB), generates
 
 Runs a guided brainstorming session to shape the idea, then creates a numbered
 openspec change (`c0001-add-user-auth`) with proposal, design, and tasks committed
-to git.
+to git. The shaping dialogue produces no intermediate document — the approved design
+goes straight into the openspec artifacts, which are the only spec of record.
 
 ### Implement a feature
 
