@@ -36,7 +36,7 @@ Run the cheap checks together:
 BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
 test -f guidelines.md && echo "guidelines: ok" || echo "guidelines: MISSING"
 test -f "openspec/changes/<change-name>/tasks.md" && echo "tasks: ok" || echo "tasks: MISSING"
-rtk git log --oneline "$BASE"..HEAD | wc -l
+git log --oneline "$BASE"..HEAD | wc -l
 ```
 
 - `guidelines: MISSING` → stop: "guidelines.md is missing. Run `/openpowers:feature init` to set up the project before delivering."
@@ -111,7 +111,7 @@ SHA transcription.
 
 ```bash
 BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
-rtk git log $(git merge-base HEAD "$BASE")..HEAD --oneline
+git log $(git merge-base HEAD "$BASE")..HEAD --oneline
 ```
 
 **5b — Collapse fixups mechanically:**
@@ -121,7 +121,7 @@ and `GIT_SEQUENCE_EDITOR=true` accepts that arrangement without opening an edito
 
 ```bash
 BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
-GIT_SEQUENCE_EDITOR=true rtk git rebase -i --autosquash $(git merge-base HEAD "$BASE")
+GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash $(git merge-base HEAD "$BASE")
 ```
 
 **5c — Verify, and only hand-edit if noise remains:**
@@ -135,11 +135,13 @@ manual reorder for *those* commits only:
 
 ```bash
 BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
-GIT_SEQUENCE_EDITOR="cp /tmp/rebase-todo" rtk git rebase -i $(git merge-base HEAD "$BASE")
+TODO=$(git rev-parse --git-path openpowers-rebase-todo)
+GIT_SEQUENCE_EDITOR="cp '$TODO'" git rebase -i $(git merge-base HEAD "$BASE")
 ```
 
-Write `/tmp/rebase-todo` with real SHAs from 5a, applying this policy: `chore:` infra →
-one setup `pick` at the start; a `fix:`/`docs:`/`test:` that belongs to a feature commit
+Before running it, write the todo to the path that
+`git rev-parse --git-path openpowers-rebase-todo` prints, with real SHAs from 5a,
+applying this policy: `chore:` infra → one setup `pick` at the start; a `fix:`/`docs:`/`test:` that belongs to a feature commit
 → `fixup`/`squash` into it; independent `feat:` → its own `pick`. Then re-run 5c to
 confirm.
 
@@ -180,8 +182,8 @@ The change directory should appear with a date prefix. Commit the archive if `op
 left it unstaged:
 
 ```bash
-rtk git add openspec/
-rtk git commit -m "spec(<change-name>): archive delivered change"
+git add openspec/
+git commit -m "spec(<change-name>): archive delivered change"
 ```
 
 ---
@@ -191,7 +193,7 @@ rtk git commit -m "spec(<change-name>): archive delivered change"
 Tag the branch tip, now that it contains everything being delivered:
 
 ```bash
-rtk git tag -a "delivered/<change-name>" \
+git tag -a "delivered/<change-name>" \
   -m "spec: <change-name> | <today's date from the currentDate system variable>"
 ```
 

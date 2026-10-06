@@ -16,7 +16,7 @@ openspec --version
 ```
 
 If this fails, stop and tell the user:
-"openspec CLI is required. Install it with: `npm install -g openspec`"
+"openspec CLI is required. Install it with: `npm install -g @fission-ai/openspec`"
 
 ---
 

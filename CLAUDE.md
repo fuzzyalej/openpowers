@@ -4,7 +4,7 @@ openpowers orchestrates openspec + superpowers into a single guided feature deve
 
 ## Dependencies (required before any /openpowers:feature command)
 
-- openspec CLI: `npm install -g openspec`
+- openspec CLI: `npm install -g @fission-ai/openspec`
 - superpowers plugin: `/plugins install superpowers@claude-plugins-official`
 
 ## Entry point

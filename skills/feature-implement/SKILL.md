@@ -81,7 +81,7 @@ Synthesise a **compact shared header** (not a full plan document) as a markdown 
 
 1. **Goal** — one sentence from the proposal's "Why" section.
 2. **Architecture notes** — 3–5 bullet constraints relevant to implementation order, distilled from `design.md` if it exists, otherwise from the proposal and `guidelines.md`. Bullets, not prose; do not paste `design.md` in whole.
-3. **Test command** — the test runner from `guidelines.md` (e.g., `rtk vitest`).
+3. **Test command** — the test runner from `guidelines.md` (e.g., `npx vitest`).
 
 Keep the remaining unchecked task list (from `tasks.md`, verbatim `- [ ]` format) separately as the checklist — it is *not* part of the per-subagent header.
 

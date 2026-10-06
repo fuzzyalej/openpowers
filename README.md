@@ -36,7 +36,7 @@ That's it. The script registers the diagon-alley marketplace in `~/.claude/setti
 
 2. **openspec CLI**:
    ```bash
-   npm install -g openspec
+   npm install -g @fission-ai/openspec
    ```
 
 3. **superpowers plugin** — install via the Claude Code plugin manager:

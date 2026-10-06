@@ -25,7 +25,7 @@ A worktree cannot remove itself, and the spec deletion in Step 6 belongs to the 
 checkout. Verify where you are:
 
 ```bash
-rtk git rev-parse --show-toplevel
+git rev-parse --show-toplevel
 ```
 
 If the path is inside `.worktrees/`, stop: "Run `/openpowers:feature abandon
@@ -40,8 +40,8 @@ BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
 echo "base: $BASE"
 test -d "openspec/changes/<change-name>" && echo "spec: openspec/changes/<change-name>" || echo "spec: none"
 test -d ".worktrees/feature-<change-name>" && echo "worktree: .worktrees/feature-<change-name>" || echo "worktree: none"
-rtk git rev-parse --verify --quiet "refs/heads/feature/<change-name>" >/dev/null && echo "branch: feature/<change-name>" || echo "branch: none"
-rtk git rev-parse --verify --quiet "refs/tags/delivered/<change-name>" >/dev/null && echo "tag: delivered/<change-name>" || echo "tag: none"
+git rev-parse --verify --quiet "refs/heads/feature/<change-name>" >/dev/null && echo "branch: feature/<change-name>" || echo "branch: none"
+git rev-parse --verify --quiet "refs/tags/delivered/<change-name>" >/dev/null && echo "tag: delivered/<change-name>" || echo "tag: none"
 test -d "openspec/changes/archive" && ls openspec/changes/archive | grep -- "<change-name>" || true
 ```
 
@@ -61,7 +61,7 @@ count and show them before asking anything:
 
 ```bash
 BASE=$(node "${CLAUDE_PLUGIN_ROOT}/scripts/default-branch.mjs")
-rtk git log --oneline "$BASE..feature/<change-name>"
+git log --oneline "$BASE..feature/<change-name>"
 ```
 
 If the branch does not exist, skip this step.
@@ -92,7 +92,7 @@ aborts: "Not abandoned. Nothing was deleted."
 ## Step 4: Remove the worktree
 
 ```bash
-rtk git worktree remove --force ".worktrees/feature-<change-name>"
+git worktree remove --force ".worktrees/feature-<change-name>"
 ```
 
 `--force` is needed because the worktree usually has uncommitted changes. Skip if Step 1
@@ -103,8 +103,8 @@ found no worktree.
 ## Step 5: Delete the branch and tag
 
 ```bash
-rtk git branch -D "feature/<change-name>"
-rtk git tag -d "delivered/<change-name>"
+git branch -D "feature/<change-name>"
+git tag -d "delivered/<change-name>"
 ```
 
 Run only the commands for refs Step 1 actually found. `-D` (not `-d`) is required
@@ -121,8 +121,8 @@ If the branch or tag was pushed, tell the user — do not delete remote refs you
 The spec is committed, so removing it is a commit of its own:
 
 ```bash
-rtk git rm -r --quiet "openspec/changes/<change-name>"
-rtk git commit -m "spec(<change-name>): abandon change"
+git rm -r --quiet "openspec/changes/<change-name>"
+git commit -m "spec(<change-name>): abandon change"
 ```
 
 Skip if Step 1 found no spec directory. If the directory exists but is untracked

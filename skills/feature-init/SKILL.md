@@ -116,7 +116,7 @@ Documentation, Feature Conventions) byte-identical across every project.
 
 Stage it (a single commit for all init files happens in Step 8):
 ```bash
-rtk git add guidelines.md
+git add guidelines.md
 ```
 
 ---
@@ -128,7 +128,7 @@ If `CLAUDE.md` does not exist, create it containing only: `@guidelines.md`
 
 Stage it:
 ```bash
-rtk git add CLAUDE.md
+git add CLAUDE.md
 ```
 
 ---
@@ -181,7 +181,7 @@ Stack-specific entries based on Question 1 answer:
 
 Stage it:
 ```bash
-rtk git add .gitignore
+git add .gitignore
 ```
 
 ---
@@ -197,7 +197,7 @@ Create these files (the directories are implied):
 
 Stage it:
 ```bash
-rtk git add docs/
+git add docs/
 ```
 
 ---
@@ -207,7 +207,7 @@ rtk git add docs/
 All init files are staged. Commit them together:
 
 ```bash
-rtk git commit -m "chore: initialize openpowers project (guidelines, CLAUDE.md, .gitignore, docs scaffold)"
+git commit -m "chore: initialize openpowers project (guidelines, CLAUDE.md, .gitignore, docs scaffold)"
 ```
 
 ---

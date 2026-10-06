@@ -28,8 +28,11 @@ Do **not** compute the number or detect re-entry by hand. Run the helper — it 
 the single source of truth for numbering and re-entry detection:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/resolve-change-name.mjs" "<raw feature description exactly as given>"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/resolve-change-name.mjs" '<raw feature description exactly as given>'
 ```
+
+Keep the single quotes so the shell does not expand `$`, backticks, or `!` in the
+description. Write any `'` in the description as `'\''`.
 
 The helper prints `key=value` lines. Read them:
 
@@ -150,8 +153,8 @@ no need to re-review afterwards, just fix and move on:
 The openspec instructions commands write files but do NOT commit to git. Commit explicitly:
 
 ```bash
-rtk git add openspec/changes/<change-name>/
-rtk git commit -m "spec(<change-name>): add proposal, design, and tasks"
+git add openspec/changes/<change-name>/
+git commit -m "spec(<change-name>): add proposal, design, and tasks"
 ```
 
 ---
