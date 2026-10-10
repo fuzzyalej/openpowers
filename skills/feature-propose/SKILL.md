@@ -140,7 +140,7 @@ no need to re-review afterwards, just fix and move on:
 1. **Placeholders** — any "TBD", "TODO", or empty section in `proposal.md` or `tasks.md`?
 2. **Internal consistency** — does every task map to something the proposal actually asks for, and does the proposal ask for anything no task covers?
 3. **Ambiguity** — could any requirement be read two ways? Pick one and make it explicit.
-4. **Scope** — count lines in `tasks.md` that match `- [ ]`. If the count exceeds 8:
+4. **Scope** — count lines in `tasks.md` that match `- [ ]`. If the count exceeds 20:
 
    "This spec has N tasks. Features this large are harder to review and riskier to merge. Consider splitting into two features before implementing. Continue anyway?"
 
