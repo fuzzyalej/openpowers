@@ -44,6 +44,30 @@ That's it. The script registers the diagon-alley marketplace in `~/.claude/setti
    /plugins install superpowers@claude-plugins-official
    ```
 
+### Optional: UX discovery tools
+
+For features with a UI/UX component, `/openpowers:feature "description"` runs these
+before brainstorming when they are installed. Without them, it prints the install
+command once and continues.
+
+- **[intent](https://github.com/ghaida/intent)** — UX strategy: the why, users,
+  journey, edge cases, and accessibility (`/intent:strategize`, `/intent:journey`,
+  `/intent:fortify`, `/intent:include`):
+  ```
+  /plugin marketplace add ghaida/intent
+  ```
+  Then open `/plugin` and install `intent`.
+
+- **[impeccable](https://github.com/pbakaus/impeccable)** — design direction
+  (`/impeccable shape` only at this stage):
+  ```
+  /plugin marketplace add pbakaus/impeccable
+  ```
+  Then open `/plugin` and install `impeccable`.
+
+openpowers does not run `impeccable init`, so no PRODUCT.md or DESIGN.md is written.
+If you run it yourself, it writes those files at the repo root, outside `openspec/`.
+
 ## Installation (manual)
 
 If you prefer not to pipe to bash, do it by hand:
@@ -83,7 +107,8 @@ Prompts for your stack (language, test framework, linter, DB), generates
 /openpowers:feature "add user authentication"
 ```
 
-Runs a guided brainstorming session to shape the idea, then creates a numbered
+For a feature with UI/UX scope, first runs UX discovery with intent and impeccable
+(if installed). Then runs a guided brainstorming session to shape the idea, and creates a numbered
 openspec change (`c0001-add-user-auth`) with proposal, design, and tasks committed
 to git. The shaping dialogue produces no intermediate document — the approved design
 goes straight into the openspec artifacts, which are the only spec of record.

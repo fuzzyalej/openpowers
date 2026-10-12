@@ -1,6 +1,6 @@
 ---
 name: feature-check-prereqs
-description: Verify that openpowers prerequisites are met. Checks that the openspec CLI is installed. Called at the start of feature-init, feature-propose, and feature-implement.
+description: Verify that openpowers prerequisites are met. Checks that the openspec CLI is installed and reports the optional intent and impeccable tools. Called at the start of feature-init, feature-propose, and feature-implement.
 ---
 
 Verify openpowers prerequisites.
@@ -20,7 +20,26 @@ If this fails, stop and tell the user:
 
 ---
 
-## Step 2: Confirm
+## Step 2: Report optional UX tools
+
+intent and impeccable are optional. They are used only by `feature-propose` for
+features with UI/UX scope. Never fail or stop because of them.
+
+Check whether each is available:
+
+- **intent:** the skill list contains `intent:strategize`, or
+  `~/.claude/plugins/installed_plugins.json` has an `intent@...` entry.
+- **impeccable:** the skill list contains `impeccable:impeccable` or `impeccable`, or
+  `~/.claude/plugins/installed_plugins.json` has an `impeccable@...` entry, or
+  `.claude/skills/impeccable/SKILL.md` or `~/.claude/skills/impeccable/SKILL.md` exists.
+
+Record the result as `intent: present|missing` and `impeccable: present|missing` for
+the calling skill. Print nothing here; `feature-propose` prints install commands only
+when it needs a missing tool.
+
+---
+
+## Step 3: Confirm
 
 Return silently with no output. The calling skill continues.
 

@@ -7,6 +7,13 @@ openpowers orchestrates openspec + superpowers into a single guided feature deve
 - openspec CLI: `npm install -g @fission-ai/openspec`
 - superpowers plugin: `/plugins install superpowers@claude-plugins-official`
 
+## Optional dependencies (UX discovery in feature-propose, UI features only)
+
+- intent plugin: `/plugin marketplace add ghaida/intent`, then install `intent` from `/plugin`
+- impeccable plugin: `/plugin marketplace add pbakaus/impeccable`, then install `impeccable` from `/plugin`
+
+If either is missing, feature-propose prints its install command once and continues without it.
+
 ## Entry point
 
 All interaction happens through `/openpowers:feature`:

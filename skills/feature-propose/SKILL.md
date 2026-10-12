@@ -39,14 +39,65 @@ The helper prints `key=value` lines. Read them:
 - `name=` → set `<change-name>` to this value for the rest of the skill.
 - `mode=reentry` → this description matches an existing change. Announce:
   "Re-entering spec for existing change: **<change-name>**. Updating artifacts."
-  **Skip Step 3 (brainstorming)** and jump directly to Step 4.
+  **Skip Steps 2.5 and 3** and jump directly to Step 4.
 - `mode=new` → Announce:
   "Feature number assigned: **<number>** | Change name: **<change-name>**"
-  Continue to Step 3.
+  Continue to Step 2.5.
 
 Naming scheme (for reference — the helper already applies it): `c<NNNN>-<slug>`.
 The leading `c` is required because openspec rejects change names that start with
 a digit.
+
+---
+
+## Step 2.5: UX discovery (UI features only)
+
+Skip this step on re-entry.
+
+**Decide UI/UX scope.** The feature has UI/UX scope if it adds or changes a screen,
+flow, component, interaction, or user-facing copy. Decide from the description and
+the repo. If it is unclear, ask one question:
+
+> "Does this feature change anything a user sees or interacts with?"
+
+If there is no UI/UX scope, announce "No UI/UX scope — skipping UX discovery." and
+go to Step 3.
+
+**Check the optional tools.** Both are optional. Use whatever `feature-check-prereqs`
+reported in Step 1:
+
+- intent missing: print once, then continue without it:
+  "Optional: install intent for UX discovery with `/plugin marketplace add ghaida/intent`, then install `intent` from `/plugin`."
+- impeccable missing: print once, then continue without it:
+  "Optional: install impeccable for design direction with `/plugin marketplace add pbakaus/impeccable`, then install `impeccable` from `/plugin`."
+
+If neither is installed, go to Step 3.
+
+**Run intent first.** Use these skills in order, scoped to this feature only:
+
+1. `intent:strategize` — the why: problem, audience, and what success looks like.
+2. `intent:journey` — the user flow: entry points, decision points, outcome.
+3. `intent:fortify` — edge cases and states: empty, loading, error, success, first run.
+4. `intent:include` — accessibility: keyboard, screen reader, contrast, cognitive load.
+
+Pass this context to each:
+
+> "This is discovery for one feature, `<change-name>`. Keep it to this feature's scope. Do not write files. Return a short summary of findings; it will feed a brainstorming session and then the openspec artifacts."
+
+**Then run impeccable's shape command.** Use the `impeccable` skill with the
+argument `shape <feature target>`. Pass this context:
+
+> "Use the intent findings above as discovery input; do not re-ask what they settled. Do not run `init` or `document`. Do not write PRODUCT.md, DESIGN.md, or any other file. Return the confirmed design brief and stop."
+
+Use only `shape`. Do not run `craft`, `critique`, `audit`, `polish`, or any build
+command at this stage. If impeccable insists on `init`, decline it and continue
+with the brief. If the user wants persistent impeccable context, `init` writes
+PRODUCT.md and DESIGN.md at the repo root; that is their choice, run outside this
+workflow, and those files never go in `openspec/`.
+
+**Retain the UX findings in your context:** the why, users, journey, edge cases and
+states, accessibility needs, copy notes, and the impeccable brief. Step 3 and Step 5
+use them.
 
 ---
 
@@ -59,6 +110,10 @@ Before invoking, pass the following instructions as additional context to the br
 > "Read `guidelines.md` at the repo root for architecture and coding standards before shaping the design. This feature must follow the architecture style described in the Architecture section of guidelines.md. Always present a 'simpler alternative' trade-off — the designer must consciously choose complexity over simplicity, not arrive at it by default."
 >
 > "Complete brainstorming checklist items 1–5 only — explore context, ask clarifying questions, propose approaches, present design sections, get user approval. **Stop when the user approves the design.** Do not perform items 6–9: do not write a design doc to `docs/superpowers/specs/`, do not run the spec self-review or the file review gate, do not invoke `writing-plans`. In openpowers the openspec artifacts *are* the design doc and item 5's approval *is* the approval gate — writing an intermediate file duplicates both."
+
+If Step 2.5 produced UX findings, also pass them:
+
+> "UX discovery for this feature is already done. Treat these findings as settled input: <UX findings from Step 2.5>. Build on them; do not re-ask what they answer. The approved design must cover the states, edge cases, accessibility needs, and copy they name."
 
 **Retain the approved design in your context.** Step 5 writes the openspec artifacts directly from it — nothing is written to disk between the user's approval and the openspec change.
 
@@ -110,12 +165,19 @@ openspec instructions proposal --change <change-name>
 ```
 Follow the instructions to write `openspec/changes/<change-name>/proposal.md`. Base all content on the approved design — do not invent new scope.
 
+If Step 2.5 ran, the proposal states the user problem, the audience, and the primary
+journey from the UX findings.
+
 **design.md — only when warranted:**
 
 Write a design doc only if the change has **non-obvious technical decisions** — a new
 architectural boundary, a data-model or API contract, or a trade-off between approaches
 that a reviewer could not infer from the proposal. For a small, mechanical, or
 single-approach change, skip it.
+
+If Step 2.5 ran, design.md is warranted. Add a UX section with the states (empty,
+loading, error, success, first run), edge cases, accessibility requirements, key copy,
+and the impeccable design direction, taken from the UX findings and the approved design.
 
 - If warranted:
   ```bash
