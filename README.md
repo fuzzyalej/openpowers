@@ -6,7 +6,7 @@ into a single opinionated workflow with a paper trail.
 
 ## What it does
 
-- Shapes features through structured brainstorming before any spec is written
+- Shapes features through structured brainstorming before any spec is written, with optional UX discovery for UI features
 - Creates ordered, numbered openspec specs committed to git as source of truth
 - Implements features in an isolated git worktree using TDD and subagents
 - Tags every delivery and archives the spec into the living system spec
@@ -186,7 +186,8 @@ and landing skills, and **openspec** owns the spec artifacts.
 
 ```mermaid
 flowchart TD
-    A["/openpowers:feature &quot;add auth&quot;"] --> B[brainstorming]
+    A["/openpowers:feature &quot;add auth&quot;"] --> U["UX discovery: intent + impeccable shape (UI features, optional)"]
+    U --> B[brainstorming]
     B --> C[openspec change created + committed]
     C --> D["/openpowers:feature implement c0001-add-auth"]
     D --> E[worktree + branch created]
@@ -202,12 +203,14 @@ flowchart TD
     K --> M[merge or PR]
 
     class A,D,H,E,F,J,K,N,O openpowers
+    class U ux
     class B,G,I,M superpowers
     class C,L openspec
 
     classDef openpowers fill:#6f42c1,stroke:#4c2889,color:#fff
     classDef superpowers fill:#1f6feb,stroke:#144a9e,color:#fff
     classDef openspec fill:#2da44e,stroke:#1a6e34,color:#fff
+    classDef ux fill:#bf8700,stroke:#8a6100,color:#fff
 ```
 
 | Legend | Plugin | Owns |
@@ -215,3 +218,4 @@ flowchart TD
 | 🟣 | **openpowers** | Orchestration, entry commands, git worktree/branch, tag, brief synthesis |
 | 🔵 | **superpowers** | Brainstorming, TDD subagents, code review, branch landing |
 | 🟢 | **openspec** | Spec change artifacts, archive into living specs |
+| 🟡 | **intent**, **impeccable** (optional) | UX discovery and design direction for UI features |
