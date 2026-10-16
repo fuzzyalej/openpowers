@@ -47,6 +47,13 @@
 - DB / persistence: {{DATABASE}}
 - Linter / formatter: {{LINTER}}
 
+## Models
+- propose: opus
+- implement: sonnet
+- review: opus
+- deliver: opus
+- trivial: haiku
+
 ## Feature Conventions
 - Changes are numbered and ordered: c0001-add-auth, c0002-add-export, ...
   (letter `c` prefix + 4-digit zero-padded ordinal + kebab-case slug, hyphens throughout).

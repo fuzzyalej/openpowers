@@ -25,6 +25,8 @@ All interaction happens through `/openpowers:feature`:
 | `/openpowers:feature "description"` | Shape and spec a new feature |
 | `/openpowers:feature propose <name>` | Re-enter spec flow for an existing change (revise artifacts) |
 | `/openpowers:feature implement <name>` | Implement a specced feature |
+| `/openpowers:feature implement <name> --model <alias>` | Implement with every subagent on one model (`haiku`, `sonnet`, `opus`) |
+| `/openpowers:feature implement <name> --economy` | Implement with every task's model one tier lower |
 | `/openpowers:feature deliver <name>` | Run delivery: code review, history cleanup, tag, archive, land |
 | `/openpowers:feature abandon <name>` | Delete a change you decided not to build: worktree, branch, spec, tag |
 
@@ -40,4 +42,8 @@ All interaction happens through `/openpowers:feature`:
 - The status table is computed by `scripts/status.mjs` — never re-derive its columns by hand.
 - Specs (openspec/): committed, source of truth. There is no intermediate design document.
 - `tasks.md` is a live progress record: each task is ticked in the same commit as its work.
+- Each task line ends with a model tag: `- [ ] 3. Add retry helper [model: sonnet]`.
+  Ticking keeps the tag. Tag rubric, phase map, and flags: `skills/model-routing.md`.
+- Models are resolved by `scripts/models.mjs` — never pick them by hand.
+- Script tests: `node --test scripts/*.test.mjs`.
 - Committed docs (docs/architecture, docs/setup, etc.): updated as part of each feature delivery

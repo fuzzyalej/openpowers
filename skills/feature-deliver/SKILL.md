@@ -26,6 +26,16 @@ Every later command in this skill that references `$BASE` must run in the same s
 invocation as its own `BASE=$(...)` assignment, or substitute the resolved value
 literally. Never hardcode `main`.
 
+**Resolve the models.** Read the `deliver` and `review` models from the phase map in
+[model-routing.md](../model-routing.md):
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/models.mjs" | grep -E '^phase\.(deliver|review)='
+```
+
+If the session runs on a model other than `deliver`, say once: "Delivery is set to
+run on **<model>**. Switch with `/model <model>` if you want that." Then continue.
+
 ---
 
 ## Step 1: Confirm readiness
@@ -95,6 +105,9 @@ If no: continue immediately.
 
 Pass the branch name and change name as context. The review targets the diff between
 this branch and the default branch resolved in Step 0.
+
+Dispatch the reviewer subagent with the `review` model from Step 0 as the `model`
+parameter of the Task/Agent call. Dispatch any fix subagent with the `deliver` model.
 
 Do NOT proceed to Step 5 until all blocking review findings are resolved and committed.
 

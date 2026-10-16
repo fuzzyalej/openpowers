@@ -9,6 +9,7 @@ into a single opinionated workflow with a paper trail.
 - Shapes features through structured brainstorming before any spec is written, with optional UX discovery for UI features
 - Creates ordered, numbered openspec specs committed to git as source of truth
 - Implements features in an isolated git worktree using TDD and subagents
+- Runs each subagent on the cheapest model that fits the task, with escalation on repeated failure
 - Tags every delivery and archives the spec into the living system spec
 - Enforces hexagonal architecture, SOLID principles, and documentation as part of done
 
@@ -122,6 +123,47 @@ goes straight into the openspec artifacts, which are the only spec of record.
 Creates a worktree on `feature/c0001-add-user-auth`, synthesises an execution brief
 from the openspec artifacts, executes it with TDD subagents, then hands off to
 `/openpowers:feature deliver` for code review, tagging, archive, and landing.
+
+Each subagent runs on the model in its task's tag. To change that for one run:
+
+```
+/openpowers:feature implement c0001-add-user-auth --model sonnet
+/openpowers:feature implement c0001-add-user-auth --economy
+```
+
+- `--model <alias>` runs every subagent on `haiku`, `sonnet`, or `opus`, and turns off escalation.
+- `--economy` moves every task one tier down: `opus` to `sonnet`, `sonnet` to `haiku`. `haiku` stays.
+
+### Model routing
+
+`/openpowers:feature "description"` ends every task in `tasks.md` with a model tag:
+
+```markdown
+- [ ] 3. Add retry helper [model: sonnet]
+```
+
+| Tag | Use for |
+|---|---|
+| `haiku` | Renames, config changes, formatting, bulk simple edits |
+| `sonnet` | Well-specified edits, tests from a clear spec, docs, mechanical refactors |
+| `opus` | New logic, multi-file design, debugging, anything ambiguous |
+
+If a task fails verification or review twice on `haiku` or `sonnet`, it runs once more
+on `opus`. If it still fails, implementation stops and reports the task.
+
+Phases use this default map:
+
+| Key | Default | Used for |
+|---|---|---|
+| `propose` | `opus` | Spec, design, and brainstorming |
+| `implement` | `sonnet` | Untagged tasks |
+| `review` | `opus` | Task reviews and code review |
+| `deliver` | `opus` | Delivery |
+| `trivial` | `haiku` | Small helper dispatches, such as scoped re-reviews |
+
+To change it, edit the `## Models` section of `guidelines.md`. `init` writes the
+section with the defaults. A missing section or key uses the default. The full
+reference is [skills/model-routing.md](skills/model-routing.md).
 
 ### Re-enter a spec
 

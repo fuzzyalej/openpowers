@@ -20,6 +20,17 @@ never type the example literally.
 
 **REQUIRED SKILL:** Use `feature-check-prereqs` with no scope argument.
 
+**Check the model.** Spec work runs on the `propose` model from the phase map in
+[model-routing.md](../model-routing.md). Resolve it:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/models.mjs" | grep '^phase.propose='
+```
+
+If the session runs on a different model, say once: "Spec work is set to run on
+**<model>**. Switch with `/model <model>` if you want that." Then continue. Pass the
+`propose` model on any subagent this skill dispatches.
+
 ---
 
 ## Step 2: Resolve the change name
@@ -192,6 +203,16 @@ openspec instructions tasks --change <change-name>
 ```
 Follow the instructions to write `openspec/changes/<change-name>/tasks.md`. Each task must map to a deliverable from the approved design.
 
+**Tag every task with a model.** End each task line with `[model: haiku]`,
+`[model: sonnet]`, or `[model: opus]`, chosen with the rubric in
+[model-routing.md](../model-routing.md). Example:
+
+```markdown
+- [ ] 3. Add retry helper [model: sonnet]
+```
+
+When in doubt, tag `opus`.
+
 ---
 
 ## Step 6: Sanity check
@@ -202,7 +223,8 @@ no need to re-review afterwards, just fix and move on:
 1. **Placeholders** — any "TBD", "TODO", or empty section in `proposal.md` or `tasks.md`?
 2. **Internal consistency** — does every task map to something the proposal actually asks for, and does the proposal ask for anything no task covers?
 3. **Ambiguity** — could any requirement be read two ways? Pick one and make it explicit.
-4. **Scope** — count lines in `tasks.md` that match `- [ ]`. If the count exceeds 20:
+4. **Model tags** — does every `- [ ]` line end with `[model: haiku|sonnet|opus]`? Add any missing tag.
+5. **Scope** — count lines in `tasks.md` that match `- [ ]`. If the count exceeds 20:
 
    "This spec has N tasks. Features this large are harder to review and riskier to merge. Consider splitting into two features before implementing. Continue anyway?"
 

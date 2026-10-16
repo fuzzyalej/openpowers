@@ -1,6 +1,6 @@
 ---
 name: feature-implement
-description: Implement a feature from its openspec change. Sets up a git worktree, builds an execution brief, executes via subagents, then hands off to feature-deliver for delivery. Use via /openpowers:feature implement <name>.
+description: Implement a feature from its openspec change. Sets up a git worktree, builds an execution brief, executes via subagents on per-task models, then hands off to feature-deliver for delivery. Use via /openpowers:feature implement <name>.
 ---
 
 Implement a feature from its openspec change.
@@ -8,6 +8,15 @@ Implement a feature from its openspec change.
 **Announce at start:** "I'm using the feature-implement skill to implement this feature."
 
 **Input:** A change name like `c0001-add-user-auth`. If not provided in `$ARGUMENTS`, resolve it.
+
+**Optional flags** (anywhere in `$ARGUMENTS`):
+
+| Flag | Effect |
+|---|---|
+| `--model <alias>` | Run every subagent in this run on `<alias>` (`haiku`, `sonnet`, or `opus`). Turns off escalation. |
+| `--economy` | Move every task's model down one tier: `opus` to `sonnet`, `sonnet` to `haiku`. `haiku` stays. |
+
+Remove the flags from `$ARGUMENTS` before you read the change name.
 
 Throughout this skill, `<change-name>` is a placeholder for that resolved name.
 Always substitute the real value — never type an example literally.
@@ -89,6 +98,26 @@ Do NOT write this to disk. Pass it as inline context to Step 6.
 
 ---
 
+## Step 5.5: Resolve models
+
+Do not pick models by hand. Run the helper from the worktree root, adding the flags
+the user gave:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/models.mjs" --tasks "openspec/changes/<change-name>/tasks.md" [--model <alias>] [--economy]
+```
+
+Keep its output beside the checklist:
+
+- `task.<id>=<model>` — the model for that task's implementer.
+- `phase.review=<model>` — the model for task reviews and the final branch review.
+- `phase.trivial=<model>` — the model for scoped re-reviews of small fix diffs.
+- `escalate=yes|no` — whether Step 6 may escalate.
+
+The tag format, rubric, and phase map are in [model-routing.md](../model-routing.md).
+
+---
+
 ## Step 6: Execute the plan
 
 **REQUIRED SKILL:** Use `superpowers:subagent-driven-development` (recommended).
@@ -96,6 +125,32 @@ Fallback: `superpowers:executing-plans` (runs in this session with checkpoints).
 
 Execution follows TDD: write failing test → implement minimal code → pass → commit.
 A fresh subagent handles each task. Each task is reviewed before the next begins.
+
+**Set the model on every dispatch.** Pass the model from Step 5.5 as the `model`
+parameter of each Task/Agent call:
+
+- Implementer: that task's `task.<id>` model.
+- Task reviewer and final branch reviewer: `phase.review`.
+- Scoped re-review of a small fix diff: `phase.trivial`.
+- Batch of small same-shape tasks in one dispatch: the highest model among them.
+
+These models replace the Model Selection guidance in
+`superpowers:subagent-driven-development`. Never omit the model; an omitted model
+inherits the session model. The `executing-plans` fallback runs in this session,
+so per-task models do not apply there.
+
+**Escalate on repeated failure.** This rule replaces the subagent-driven-development
+fix-loop escalation. A failure is a red test run or a review with open blocking
+findings.
+
+1. If a task fails twice on its Step 5.5 model, and that model is not `opus`, dispatch
+   a fresh implementer on `opus` once, with the open findings.
+2. If it still fails, stop. Report the task, the models tried, and the open findings
+   to the user. Do not start the next task.
+3. Never escalate a task that already runs on `opus`. After two failures, stop and
+   report.
+4. If Step 5.5 printed `escalate=no`, do not escalate. Stop and report after two
+   failures.
 
 **Scope each subagent to one task.** Dispatch each subagent with *only* the compact
 shared header from Step 5 plus that subagent's **single** task line — never the full
@@ -110,6 +165,7 @@ commit. This makes `tasks.md` a live progress record rather than a checklist rew
 at the end: `/openpowers:feature` can report real progress, an interrupted run resumes
 from the first unticked line, and delivery can verify completion instead of asserting
 it. Never tick a task whose tests are not green, and never tick ahead of the work.
+Change only `[ ]` to `[x]`. Keep the rest of the line, including the `[model: ...]` tag.
 
 **Commit convention (enables mechanical autosquash at delivery).** Each task's first
 commit uses a normal Conventional Commit (`feat:`, `test:`, `fix:` for a genuinely new

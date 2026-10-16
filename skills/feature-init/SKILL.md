@@ -114,6 +114,10 @@ Documentation, Feature Conventions) byte-identical across every project.
    grep -n "{{" guidelines.md && echo "UNFILLED PLACEHOLDERS — fix before continuing" || echo "OK"
    ```
 
+5. **Keep the `## Models` section.** The template ships it with the default phase
+   map from `${CLAUDE_PLUGIN_ROOT}/skills/model-routing.md`. Do not change it unless
+   the user asks. feature-implement and feature-deliver read it.
+
 Stage it (a single commit for all init files happens in Step 8):
 ```bash
 git add guidelines.md
@@ -216,7 +220,7 @@ git commit -m "chore: initialize openpowers project (guidelines, CLAUDE.md, .git
 
 Tell the user:
 "Project initialized in one commit:
-- guidelines.md (architecture, SOLID, security, testing, linting, stack)
+- guidelines.md (architecture, SOLID, security, testing, linting, stack, models)
 - CLAUDE.md updated to load guidelines
 - .gitignore with security and stack-specific rules
 - docs/ structure scaffolded

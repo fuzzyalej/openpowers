@@ -14,7 +14,7 @@ Read `$ARGUMENTS` and apply this routing logic:
 |---|---|
 | (empty) | **REQUIRED SKILL:** Use `feature-status` |
 | `init` | **REQUIRED SKILL:** Use `feature-init` |
-| `implement <name>` | **REQUIRED SKILL:** Use `feature-implement` with `<name>` as input |
+| `implement <name> [--model <alias>] [--economy]` | **REQUIRED SKILL:** Use `feature-implement` with `<name>` and any flags as input |
 | `propose <name>` | **REQUIRED SKILL:** Use `feature-propose` with `<name>` as input (re-entry for existing change) |
 | `deliver <name>` | **REQUIRED SKILL:** Use `feature-deliver` with `<name>` as input |
 | `abandon <name>` | **REQUIRED SKILL:** Use `feature-abandon` with `<name>` as input |
